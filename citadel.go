@@ -11,27 +11,30 @@ import (
 
 type Playerchar struct {
 	Name          string
-	Health        uint8
-	CurrHealthMax uint8
+	Health        int
+	CurrHealthMax int
 	Area          string //chapter/floor
 	location      uint8  //primary key for maplocs
-	Atk           uint8  //scales with lvl. Starts at 2. multiplier of Rend method func
+	Atk           int    //scales with lvl. Starts at 2. multiplier of Rend method func
 	Weapon        string
-	Weapondmg     uint8
-	Level         uint8
-	Str           uint8
-	Dex           uint8
-	Con           uint8
-	Int           uint8
+	Weapondmg     int
+	Level         int
+	Str           int
+	Dex           int
+	Con           int
+	Int           int
+	totxp         int
 }
+
 type Enemy struct {
 	Name      string
 	Typeofen  string
 	Typeofatk string
-	Atk       uint8
+	Atk       int
 	Battlecry string
 	Deathcry  string
-	Health    uint8
+	Health    int
+	worthxp   int
 }
 
 type maploc struct {
@@ -48,8 +51,9 @@ func playerprompt(player *Playerchar) string {
 	fmt.Print(PLAYERPROMPT)
 	promptval := strings.ToUpper(player.Name + "═")
 	prompthp := strconv.Itoa(int(player.Health))
-	return promptval + string(prompthp) + "═>"
+	return promptval + string(prompthp) + "HP═>"
 }
+
 func generatemaplocdata(loc *maploc) {
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
 	fmt.Print(NAVAREA)
@@ -69,12 +73,15 @@ func generatemaplocdata(loc *maploc) {
 
 }
 
-func checkbattle(player *Playerchar, mobs []*Enemy) {
+func checkbattle(player *Playerchar, mob *Enemy) {
 	fmt.Print(ENEMIESLISTED)
 	color.Set(color.FgRed, color.Bold, color.BgBlack) //movecursor
-	for _, v := range mobs {
 
-		fmt.Printf("\n%v the %v is here.", v.Name, v.Typeofen)
+	if mob.Health <= 0 {
+		color.Set(color.FgWhite, color.BgBlack)
+		fmt.Printf("\nThe corpse of %v the %v is here.", mob.Name, mob.Typeofen)
+	} else if mob.Health > 0 {
+		fmt.Printf("\n%v the %v is here.", mob.Name, mob.Typeofen)
 	}
 
 	time.Sleep(time.Millisecond * 200)
@@ -164,34 +171,36 @@ func checkmove(player *Playerchar, exits []int) {
 			fmt.Println("You go down")
 			player.location = uint8(exits[5])
 		}
-		//build remaining choices
+	case 'b':
+		player.battleinit()
 
 	}
 	time.Sleep(time.Millisecond * 400)
 	navigator(player)
 }
+
 func navigator(player *Playerchar) {
 	clear()
 	drawplayerbar(player)
+	player.makehealthbar()
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
 
 	switch player.location {
 	case 1:
 		generatemaplocdata(cellar1)
-		checkbattle(player, cellar1.mobs)
+		checkbattle(player, rat1)
 		checkmove(player, cellar1.exits) //passes to checkmove: pointer to Playerchar struct and slice of string from maploc
 	case 2:
 		generatemaplocdata(cellar2)
-		checkbattle(player, cellar2.mobs)
+		checkbattle(player, rat2)
 		checkmove(player, cellar2.exits)
-
 	case 3:
 		generatemaplocdata(cellar3)
-		checkbattle(player, cellar3.mobs)
+		checkbattle(player, rat3)
 		checkmove(player, cellar3.exits)
 	case 4:
 		generatemaplocdata(cellar4)
-		checkbattle(player, cellar4.mobs)
+		checkbattle(player, bossrat)
 		checkmove(player, cellar4.exits)
 	}
 
@@ -201,9 +210,9 @@ func navigator(player *Playerchar) {
 
 func main() {
 
-	//titleintro()
-	//storyintro()
-	clear()                        //temp - remove after titleintro and storyintro are back in
+	titleintro()
+	storyintro()
+	//              //temp - remove after titleintro and storyintro are back in
 	P1 := new(Playerchar)          //creates player struct
 	initworld()                    //sets up Enemies and maplocs
 	initplayer(P1)                 //set initial player values

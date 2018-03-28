@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dariubs/percent"
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
 )
@@ -25,23 +26,108 @@ var bossrat = new(Enemy)
 func (f *Playerchar) SetName(name string) {
 	(*f).Name = name
 }
+func (f *Playerchar) makehealthbar() {
+	fmt.Printf(HEALTHBAR)
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	fmt.Printf("[")
+	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(f.CurrHealthMax, f.CurrHealthMax))/10))
+	fmt.Printf("]")
+	fmt.Printf(HEALTHBARFILL)
+	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(f.Health, f.CurrHealthMax))/10))
+}
+func (f *Playerchar) attack(mob *Enemy) {
+	clear()
+	fmt.Println(ZEROHOME)
+	drawplayerbar(f)
+
+	for mob.Health > 0 {
+
+		fmt.Printf("Attacking %v\n", mob.Name)
+		time.Sleep(time.Millisecond * 1000)
+		fmt.Printf("%v attacks %v for %v\n", f.Name, mob.Name, f.Rend(mob))
+		mob.Health = mob.Health - f.Rend(mob)
+		fmt.Println(mob.Health)
+		fmt.Printf("%v attacks %v for %v\n", mob.Name, f.Name, mob.ratbite(f))
+		fmt.Println(f.Health)
+		f.Health = f.Health - int(mob.ratbite(f))
+
+		if f.Health <= 0 {
+			playerdeath()
+		}
+	}
+	f.addxp(mob.worthxp)
+	f.checklvl()
+}
+func (f *Playerchar) battleinit() {
+	switch f.location {
+	case 1:
+		f.attack(rat1)
+	case 2:
+		f.attack(rat2)
+	case 3:
+		f.attack(rat3)
+	case 4:
+		f.attack(bossrat)
+	}
+}
+
+func (f *Playerchar) checklvl() {
+	if f.totxp == 1200 {
+		f.levup()
+	} else if f.totxp == 3000 {
+		f.levup()
+	}
+
+}
+func (f *Playerchar) addxp(xp int) {
+	(*f).totxp += xp
+}
+
+func (f *Playerchar) levup() {
+	f.Level++
+	f.Str++
+	f.Con++
+	f.Atk++
+	f.Int++
+	f.SetHealth()
+	f.Updatehp(f.CurrHealthMax)
+	fmt.Println(PLAYERMOVEMENT)
+	color.Set(color.FgBlue, color.Bold, color.BgBlack)
+	fmt.Printf("%v gained a Level!!!\n", strings.ToUpper(f.Name))
+	color.Set(color.FgWhite, color.Bold, color.BgBlack)
+	fmt.Printf("Str +1\nCon +1\nAtk+1\nInt+1\n")
+	fmt.Printf("New XP total: %v\n", f.totxp)
+	time.Sleep(time.Millisecond * 2300)
+
+}
 
 func (f *Playerchar) SetHealth() {
-	(*f).Health = f.Con * f.Level * 2
+	(*f).Health = int(f.Con * f.Level * 2)
 	(*f).CurrHealthMax = f.Health
 }
 
-func (f *Playerchar) Updatehp(newtot uint8) {
+func (f *Playerchar) Updatehp(newtot int) {
 	(*f).Health = newtot
 }
 
-func (f *Playerchar) Rend(e1 *Enemy) uint8 {
+func (f *Playerchar) Rend(e1 *Enemy) int {
 	//return a damage value starting value ~ 4
 	return f.Atk + f.Str/10*f.Weapondmg
 }
 
 func (f *Playerchar) GetName() string {
 	return f.Name
+}
+
+func (f *Playerchar) GetHealth() int {
+	return f.Health
+}
+
+func playerdeath() {
+	fmt.Println(ZEROHOME)
+	clear()
+	fmt.Println("You died alone. Feels Bad Man.")
+	os.Exit(0)
 }
 func initplayername(player *Playerchar) string {
 
@@ -126,7 +212,7 @@ func initworld() { //creates all maplocs and enemys
 	time.Sleep(time.Millisecond * 110)
 	rand.Seed(time.Now().UnixNano())
 	bossrat.Ratnamegen()
-
+	rat1.worthxp, rat2.worthxp, rat3.worthxp, bossrat.worthxp = 400, 400, 400, 800
 	rat1.Typeofen, rat2.Typeofen, rat3.Typeofen, bossrat.Typeofen = "Giant Rat", "Giant Rat", "Giant Rat", "King Rat"
 	rat1.Typeofatk, rat2.Typeofatk, rat3.Typeofatk, bossrat.Typeofatk = "bite", "bite", "bite", "gnaw"
 	rat1.Atk, rat2.Atk, rat3.Atk, bossrat.Atk = 1, 1, 1, 3
@@ -144,8 +230,12 @@ func initworld() { //creates all maplocs and enemys
 	cellar3.mobs = []*Enemy{rat3}
 	cellar4.mobs = []*Enemy{bossrat}
 }
-func (en *Enemy) ratbite(target *Playerchar) uint8 {
-	return en.Atk + uint8(drawrand4())
+func (en *Enemy) ratbite(target *Playerchar) int {
+	return en.Atk + int(drawrand4()) //returns uint8 to subtract from playerhp
+}
+
+func (en *Enemy) GetHealth() int {
+	return en.Health
 }
 func (en *Enemy) Ratnamegen() {
 
@@ -164,7 +254,7 @@ func (en *Enemy) Ratnamegen() {
 		4: "kansta",
 	}
 
-	(*en).Name = ratnames1[random(0, 4)] + ratnames2[random(0, 4)]
+	(*en).Name = ratnames1[random(0, 5)] + ratnames2[random(0, 5)]
 }
 
 func drawtitle() {
@@ -317,9 +407,12 @@ const (
 	NAVDESCRIP          = "\033[11;0H"
 	NAVTRAVEL           = "\033[18;0H"
 	ENEMIESLISTED       = "\033[19;0H"
+	HEALTHBAR           = "\033[4;40H"
+	HEALTHBARFILL       = "\033[4;41H"
 	NAVTRAVELOUTPUT     = "\033[17;0H"
 	PLAYERPROMPT        = "\033[21;0H"
 	PLAYERMOVEMENT      = "\033[22;0H"
+	COMBATSTART         = "\033[23;0H"
 	DELETETOENDOFLINE   = "\033[K"
 	SAVECURSOR          = "\033[s"
 	RETURNTOSAVEDCURSOR = "\033[u"
