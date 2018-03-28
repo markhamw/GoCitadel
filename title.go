@@ -257,10 +257,10 @@ var castle = `
  ||_|_|_|_|_|_|_|___|___|___|___||_|_|_|_|_|____|___|___|____|___|__|__|__|`
 
 var castletext = []string{
-	0: "\nYour're an adventurer living in Castle Iota, currently working as a mercenary for the emporer.\n",
-	1: "Your last assignment was to clear any rats from the cellar & you are approaching the cellar now.\n",
-	2: "Out of control cellar vermin are causing trouble with kitchen staff, again. Master Gurlows expects raticide.\n",
-	3: "You ready your flail and prepare to enter the Cellar.\nPRESS ANY KEY TO CONTINUE",
+	0: "\nYou're a mercenary adventurer...living in the castle...working for the Emperor, and apprentice to Master Gurlows.\n",
+	1: "Your assignment is to clear any rats from the cellar & you are approaching the cellar now. Rumors dictate a king rat holds the sub-basement.\n",
+	2: "The fack'n vermin are causing trouble with kitchen staff, again. Master Gurlows expects raticide. \n",
+	3: "You ready your weapon and prepare to enter the Cellar.\nPRESS ANY KEY TO CONTINUE",
 }
 
 var storyintrotext1 = []string{

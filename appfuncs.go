@@ -26,7 +26,34 @@ var bossrat = new(Enemy)
 func (f *Playerchar) SetName(name string) {
 	(*f).Name = name
 }
+
+func (f *Playerchar) hitroll(max int) bool {
+	var results bool
+	randplayermiss := rand.Intn(max)
+	if randplayermiss <= 2 {
+		results = false
+	}
+	if randplayermiss > 2 {
+		results = true
+	}
+	return results
+}
+func (e *Enemy) hitroll(max int) bool {
+	var results bool
+	randenemymiss := rand.Intn(max)
+	if randenemymiss <= 2 {
+		results = false
+	}
+	if randenemymiss > 2 {
+		results = true
+	}
+	return results
+}
+
 func (f *Playerchar) makehealthbar() {
+	if f.Health <= 0 {
+		playerdeath()
+	}
 	fmt.Printf(HEALTHBAR)
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	fmt.Printf("[")
@@ -40,24 +67,41 @@ func (f *Playerchar) attack(mob *Enemy) {
 	fmt.Println(ZEROHOME)
 	drawplayerbar(f)
 
+	if mob.Health <= 0 {
+		navigator(f) //quit out
+	}
+
 	for mob.Health > 0 {
 
-		fmt.Printf("Attacking %v\n", mob.Name)
-		time.Sleep(time.Millisecond * 1000)
-		fmt.Printf("%v attacks %v for %v\n", f.Name, mob.Name, f.Rend(mob))
-		mob.Health = mob.Health - f.Rend(mob)
-		fmt.Println(mob.Health)
-		fmt.Printf("%v attacks %v for %v\n", mob.Name, f.Name, mob.ratbite(f))
-		fmt.Println(f.Health)
-		f.Health = f.Health - int(mob.ratbite(f))
+		//f.makehealthbar() //check for <=0 HP and draw percentage bar
 
-		if f.Health <= 0 {
-			playerdeath()
+		if f.hitroll(10) == true {
+			fmt.Printf("\t%v's attack hits!! %v damage to %v\n", f.Name, f.Rend(mob), mob.Name)
+			mob.Health = mob.Health - f.Rend(mob)
+			time.Sleep(time.Millisecond * 1000)
+		} else {
+			fmt.Printf("\t%v misses\n", f.Name)
+			time.Sleep(time.Millisecond * 2000)
 		}
+
+		if mob.hitroll(4) == true {
+			fmt.Printf("\t%v hits. The %v does %v damage\n", mob.Name, mob.Typeofatk, mob.ratbite(f))
+			f.Health = f.Health - int(mob.ratbite(f))
+			time.Sleep(time.Millisecond * 1000)
+		} else {
+			fmt.Printf("\t%v tries to bite and misses.\n", mob.Name)
+			time.Sleep(time.Millisecond * 2000)
+		}
+
 	}
+	color.Set(color.FgRed, color.Bold, color.BgWhite)
+	fmt.Printf("\n\n\t%v is slain. %v XP awarded.", mob.Name, mob.worthxp)
+	color.Set(color.FgRed, color.Bold, color.BgBlack)
+	time.Sleep(time.Millisecond * 2000)
 	f.addxp(mob.worthxp)
 	f.checklvl()
 }
+
 func (f *Playerchar) battleinit() {
 	switch f.location {
 	case 1:
@@ -412,6 +456,7 @@ const (
 	NAVTRAVELOUTPUT     = "\033[17;0H"
 	PLAYERPROMPT        = "\033[21;0H"
 	PLAYERMOVEMENT      = "\033[22;0H"
+	ATTACKSTART         = "\033[6;0H"
 	COMBATSTART         = "\033[23;0H"
 	DELETETOENDOFLINE   = "\033[K"
 	SAVECURSOR          = "\033[s"

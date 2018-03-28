@@ -48,7 +48,7 @@ type maploc struct {
 }
 
 func playerprompt(player *Playerchar) string {
-	fmt.Print(PLAYERPROMPT)
+	fmt.Print("\n")
 	promptval := strings.ToUpper(player.Name + "═")
 	prompthp := strconv.Itoa(int(player.Health))
 	return promptval + string(prompthp) + "HP═>"
@@ -79,7 +79,7 @@ func checkbattle(player *Playerchar, mob *Enemy) {
 
 	if mob.Health <= 0 {
 		color.Set(color.FgWhite, color.BgBlack)
-		fmt.Printf("\nThe corpse of %v the %v is here.", mob.Name, mob.Typeofen)
+		fmt.Printf("\nThe corpse of %v the %v is here.\n", mob.Name, mob.Typeofen)
 	} else if mob.Health > 0 {
 		fmt.Printf("\n%v the %v is here.", mob.Name, mob.Typeofen)
 	}
@@ -87,38 +87,38 @@ func checkbattle(player *Playerchar, mob *Enemy) {
 	time.Sleep(time.Millisecond * 200)
 }
 
-func playercantgo(c rune) {
-	fmt.Printf(PLAYERMOVEMENT)
+func playercantgo(player *Playerchar, c rune) {
+	fmt.Print(PLAYERPROMPT)
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	switch c {
 	case 'n':
-		fmt.Println("You cannot move north any farther.")
+		fmt.Printf("%v cannot move north any farther.", strings.ToTitle(player.Name))
 	case 's':
-		fmt.Println("You're entirely unable to travel further south.")
+		fmt.Printf("%v is entirely unable to travel further south.", strings.ToTitle(player.Name))
 	case 'e':
-		fmt.Println("Can't go further east.")
+		fmt.Printf("%v can't go further east.", strings.ToTitle(player.Name))
 	case 'w':
-		fmt.Println("Can't head further west.")
+		fmt.Printf("%v can't head further west.", strings.ToTitle(player.Name))
 	case 'd':
-		fmt.Println("You want to burrow into the ground? Figure out something else.")
+		fmt.Printf("You want to burrow into the ground? Figure out something else, %v.", strings.ToTitle(player.Name))
 	case 'u':
-		fmt.Println("You wot mate? Can't go up here.")
+		fmt.Printf("You wot mate? Can't go up here, %v.", strings.ToTitle(player.Name))
 	}
 
 	time.Sleep(time.Millisecond * 650)
 }
 func checkmove(player *Playerchar, exits []int) {
 	color.Set(color.FgHiMagenta, color.Bold, color.BgBlack)
-	fmt.Println(playerprompt(player))
+	fmt.Printf(playerprompt(player))
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	switch OKP() {
 	case 'n':
 		switch exits[0] {
 		case -1:
-			playercantgo('n')
+			playercantgo(player, 'n')
 			break
 		default:
-			fmt.Println("You move north")
+			fmt.Printf("%v heads north", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[0])
 
 		}
@@ -126,10 +126,10 @@ func checkmove(player *Playerchar, exits []int) {
 	case 's':
 		switch exits[1] {
 		case -1:
-			playercantgo('s')
+			playercantgo(player, 's')
 			break
 		default:
-			fmt.Println("You move south")
+			fmt.Printf("%v heads south", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[1])
 		}
 
@@ -137,38 +137,38 @@ func checkmove(player *Playerchar, exits []int) {
 
 		switch exits[2] {
 		case -1:
-			playercantgo('e')
+			playercantgo(player, 'e')
 			break
 		default:
-			fmt.Println("You go east")
+			fmt.Printf("%v heads east", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[2])
 		}
 
 	case 'w':
 		switch exits[3] {
 		case -1:
-			playercantgo('w')
+			playercantgo(player, 'w')
 			break
 		default:
-			fmt.Println("You go west")
+			fmt.Printf("%v heads west", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[3])
 		}
 	case 'u':
 		switch exits[4] {
 		case -1:
-			playercantgo('u')
+			playercantgo(player, 'u')
 			break
 		default:
-			fmt.Println("You go up")
+			fmt.Printf("%v goes up", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[4])
 		}
 	case 'd':
 		switch exits[5] {
 		case -1:
-			playercantgo('d')
+			playercantgo(player, 'd')
 			break
 		default:
-			fmt.Println("You go down")
+			fmt.Printf("%v heads downward", strings.ToTitle((player.Name)))
 			player.location = uint8(exits[5])
 		}
 	case 'b':
