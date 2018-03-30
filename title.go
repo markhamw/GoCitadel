@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/fatih/color"
 )
 
 func drawskull() {
-	color.Set(color.FgRed, color.Bold, color.BgBlack)
+	conred()
 	for _, text := range skull {
 		fmt.Println("\t\t\t\t", text)
 	}
@@ -21,7 +19,7 @@ func skullrefresh() {
 	}
 }
 func skulldrawdown() {
-	color.Set(color.FgRed, color.Bold, color.BgBlack)
+	conred()
 	titlebar1 := strings.Repeat("_", len(titletext[1])/2) //Prints Red Bar below erase effect f
 	fmt.Println(HOME)                                     //Moves cursor to start of 11th line
 	fmt.Println(DELETETOENDOFLINE)
@@ -205,7 +203,7 @@ var skull = [26]string{
 	20: "                                `             '",
 }
 
-func tutintro(player *Playerchar) {
+func tutintro(player *playerchar) {
 	drawplayertitleframe(player)
 	fmt.Println(castle)
 	readblock(castletext)

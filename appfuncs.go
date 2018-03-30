@@ -18,27 +18,56 @@ var cellar1 = new(maploc)
 var cellar2 = new(maploc)
 var cellar3 = new(maploc)
 var cellar4 = new(maploc)
-var rat1 = new(Enemy)
-var rat2 = new(Enemy)
-var rat3 = new(Enemy)
-var bossrat = new(Enemy)
+var rat1 = new(enemy)
+var rat2 = new(enemy)
+var rat3 = new(enemy)
+var bossrat = new(enemy)
 
-func (f *Playerchar) SetName(name string) {
+func (f *playerchar) SetName(name string) {
 	(*f).Name = name
 }
 
-func (f *Playerchar) hitroll(max int) bool {
+func (f *playerchar) getdamageroll() int {
+	return f.Atk + f.Str/10*f.Weapondmg + int(drawrand4())
+}
+func (e *enemy) getdamageroll() int {
+	return e.Atk + int(drawrand4())
+}
+
+func (f *playerchar) hitroll(max int) bool {
 	var results bool
-	randplayermiss := rand.Intn(max)
-	if randplayermiss <= 2 {
+	x := rand.Intn(max)
+	if x <= 2 {
 		results = false
 	}
-	if randplayermiss > 2 {
+	if x > 2 {
 		results = true
 	}
 	return results
 }
-func (e *Enemy) hitroll(max int) bool {
+
+func isstanding(character citentity) bool {
+	if character.isalive() {
+		return true
+	}
+	return false
+}
+
+func (e *enemy) isalive() bool {
+	if e.Health > 0 {
+		return true
+	}
+	return false
+}
+
+func (f *playerchar) isalive() bool {
+	if f.Health > 0 {
+		return true
+	}
+	return false
+}
+
+func (e *enemy) hitroll(max int) bool {
 	var results bool
 	randenemymiss := rand.Intn(max)
 	if randenemymiss <= 2 {
@@ -50,7 +79,7 @@ func (e *Enemy) hitroll(max int) bool {
 	return results
 }
 
-func (f *Playerchar) makehealthbar() {
+func (f *playerchar) makehealthbar() {
 	if f.Health <= 0 {
 		playerdeath()
 	}
@@ -62,60 +91,201 @@ func (f *Playerchar) makehealthbar() {
 	fmt.Printf(HEALTHBARFILL)
 	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(f.Health, f.CurrHealthMax))/10))
 }
-func (f *Playerchar) attack(mob *Enemy) {
+func (f *playerchar) updatehealthbar() {
+	if f.Health <= 0 {
+		playerdeath()
+	}
+	fmt.Printf(HEALTHBAR)
+	fmt.Print(DELETETOENDOFLINE)
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	fmt.Printf("[")
+	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(f.CurrHealthMax, f.CurrHealthMax))/10))
+	fmt.Printf("]")
+	fmt.Printf(HEALTHBARFILL)
+	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(f.Health, f.CurrHealthMax))/10))
+	fmt.Print(RETURNTOSAVEDCURSOR)
+}
+func (e *enemy) updatehealthbar() {
+	if e.Health <= 0 {
+		e.reportdeath()
+	}
+	fmt.Printf(ENEMYHEALTHBAR)
+	fmt.Print(DELETETOENDOFLINE)
+	conred()
+	fmt.Printf("[")
+	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(e.CurrHealthMax, e.CurrHealthMax))/10))
+	fmt.Printf("]")
+	fmt.Printf(ENEMYHEALTHBARFILL)
+	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(e.Health, e.CurrHealthMax))/10))
+	fmt.Print(RETURNTOSAVEDCURSOR)
+}
+func (e *enemy) makehealthbar() {
+	if e.Health <= 0 {
+		e.reportdeath()
+	}
+	fmt.Print(ENEMYHEALTHBAR)
+	conred()
+	fmt.Printf("[")
+	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(e.CurrHealthMax, e.CurrHealthMax))/10))
+	fmt.Printf("]")
+	fmt.Print(ENEMYHEALTHBARFILL)
+	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(e.Health, e.CurrHealthMax))/10))
+}
+
+func (f *playerchar) brpds(e *enemy) {
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	x := f.getdamageroll()
+	e.Updatehp(e.Health - x)
+	fmt.Printf("\t%v«%v» %v %v with %v for %v\n", entprompt(f), f.GetHealth(), f.attackstring(), e.GetName(), f.Weapon, strconv.Itoa(x))
+	time.Sleep(time.Millisecond * 2000)
+} //battle report details string
+
+func (f *playerchar) brmiss() { //battle report MISS
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	fmt.Printf("\t%v«%v» %v\n", entprompt(f), f.GetHealth(), f.miss())
+	time.Sleep(time.Millisecond * 2000)
+}
+
+func (e *enemy) enemybrpds(p *playerchar) {
+	conred()
+	x := e.getdamageroll()
+	p.Updatehp(p.Health - x)
+	fmt.Printf("\t%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
+	time.Sleep(time.Millisecond * 2000)
+}
+
+func (e *enemy) enemybrpdsmiss() {
+	conred()
+	fmt.Printf("\t%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.GetName(), e.miss())
+	time.Sleep(time.Millisecond * 2000)
+}
+
+func battreport(p *playerchar, en *enemy) {
+	for en.Health > 0 {
+		if p.hitroll(10) {
+			p.brpds(en)
+		} else {
+			p.brmiss()
+		}
+
+		if en.hitroll(7) { //difficulty modifier?? //increase to increase liklihood of hitting
+			en.enemybrpds(p)
+		} else {
+			en.enemybrpdsmiss()
+		}
+	}
+
+}
+
+func (e *enemy) miss() string {
+	x := []string{
+		0: "tries to bite and misses",
+		1: "tries to hit!, and misses.",
+		2: "squeeks and grits its teeth.",
+		3: "gets dodged on.",
+		4: "leaves a dropping",
+	}
+	return x[rand.Intn(5)]
+}
+
+func (f *playerchar) miss() string {
+	x := []string{
+		0: "misses.",
+		1: "tries to hit!, and misses.",
+		2: "grunts and swings wide.",
+		3: "gets dodged on.",
+		4: "almost hit!",
+	}
+	return x[rand.Intn(5)]
+}
+
+func (e *enemy) attackstring() string {
+	x := []string{
+		0: "nips",
+		1: "slashes",
+		2: "bites",
+		3: "chomps",
+		4: "pisses off",
+	}
+	return x[rand.Intn(5)]
+}
+func (f *playerchar) attackstring() string {
+	x := []string{
+		0: "grazes",
+		1: "hits",
+		2: "damages",
+		3: "deflects",
+		4: "wollops",
+	}
+	return x[rand.Intn(5)]
+}
+
+func (f *playerchar) attack(mob *enemy) {
 	clear()
 	fmt.Println(ZEROHOME)
 	drawplayerbar(f)
-
-	if mob.Health <= 0 {
-		navigator(f) //quit out
-	}
-
 	for mob.Health > 0 {
-
-		//f.makehealthbar() //check for <=0 HP and draw percentage bar
-
-		if f.hitroll(10) == true {
-			fmt.Printf("\t%v's attack hits!! %v damage to %v\n", f.Name, f.Rend(mob), mob.Name)
-			mob.Health = mob.Health - f.Rend(mob)
-			time.Sleep(time.Millisecond * 1000)
+		if f.isalive() == false {
+			playerdeath()
 		} else {
-			fmt.Printf("\t%v misses\n", f.Name)
-			time.Sleep(time.Millisecond * 2000)
-		}
-
-		if mob.hitroll(4) == true {
-			fmt.Printf("\t%v hits. The %v does %v damage\n", mob.Name, mob.Typeofatk, mob.ratbite(f))
-			f.Health = f.Health - int(mob.ratbite(f))
-			time.Sleep(time.Millisecond * 1000)
-		} else {
-			fmt.Printf("\t%v tries to bite and misses.\n", mob.Name)
-			time.Sleep(time.Millisecond * 2000)
+			battreport(f, mob)
 		}
 
 	}
-	color.Set(color.FgRed, color.Bold, color.BgWhite)
+	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
 	fmt.Printf("\n\n\t%v is slain. %v XP awarded.", mob.Name, mob.worthxp)
-	color.Set(color.FgRed, color.Bold, color.BgBlack)
 	time.Sleep(time.Millisecond * 2000)
 	f.addxp(mob.worthxp)
 	f.checklvl()
 }
 
-func (f *Playerchar) battleinit() {
+func (f *playerchar) getmaploc() string {
+	var x string
 	switch f.location {
 	case 1:
-		f.attack(rat1)
+		x = cellar1.title
 	case 2:
-		f.attack(rat2)
+		x = cellar2.title
 	case 3:
-		f.attack(rat3)
+		x = cellar3.title
 	case 4:
-		f.attack(bossrat)
+		x = cellar4.title
+	}
+	return x
+}
+
+func (f *playerchar) battleinit() {
+
+	switch f.location {
+	case 1:
+		if rat1.isalive() {
+			f.attack(rat1)
+		} else {
+			navigator(f)
+		}
+
+	case 2:
+		if rat2.isalive() {
+			f.attack(rat2)
+		} else {
+			navigator(f)
+		}
+	case 3:
+		if rat3.isalive() {
+			f.attack(rat3)
+		} else {
+			navigator(f)
+		}
+	case 4:
+		if bossrat.isalive() {
+			f.attack(bossrat)
+		} else {
+			navigator(f)
+		}
 	}
 }
 
-func (f *Playerchar) checklvl() {
+func (f *playerchar) checklvl() {
 	if f.totxp == 1200 {
 		f.levup()
 	} else if f.totxp == 3000 {
@@ -123,11 +293,11 @@ func (f *Playerchar) checklvl() {
 	}
 
 }
-func (f *Playerchar) addxp(xp int) {
+func (f *playerchar) addxp(xp int) {
 	(*f).totxp += xp
 }
 
-func (f *Playerchar) levup() {
+func (f *playerchar) levup() {
 	f.Level++
 	f.Str++
 	f.Con++
@@ -135,7 +305,6 @@ func (f *Playerchar) levup() {
 	f.Int++
 	f.SetHealth()
 	f.Updatehp(f.CurrHealthMax)
-	fmt.Println(PLAYERMOVEMENT)
 	color.Set(color.FgBlue, color.Bold, color.BgBlack)
 	fmt.Printf("%v gained a Level!!!\n", strings.ToUpper(f.Name))
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
@@ -144,27 +313,45 @@ func (f *Playerchar) levup() {
 	time.Sleep(time.Millisecond * 2300)
 
 }
+func (f *playerchar) printstats() {
+	clear()
+	drawplayerbar(f)
+	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
+	fmt.Print(entprompt(f))
+	fmt.Printf("\nBase Attack Power: %v (Using %v)\n\n", f.Atk, f.Weapon)
+	fmt.Printf("░ STR:%v ░ DEX:%v ░ CON:%v ░ INT:%v ░\n\n", f.Str, f.Dex, f.Con, f.Int)
+	fmt.Printf("Total XP: %v\n\n", f.totxp)
+	fmt.Printf("Current location: %v\n\n", f.getmaploc())
+	fmt.Println("PRESS ANY KEY TO CONTINUE..")
+	getcharpause()
+}
 
-func (f *Playerchar) SetHealth() {
+func (f *playerchar) SetHealth() {
 	(*f).Health = int(f.Con * f.Level * 2)
 	(*f).CurrHealthMax = f.Health
 }
 
-func (f *Playerchar) Updatehp(newtot int) {
+func (f *playerchar) Updatehp(newtot int) {
 	(*f).Health = newtot
 }
 
-func (f *Playerchar) Rend(e1 *Enemy) int {
+func (f *playerchar) Rend(e *enemy) int {
 	//return a damage value starting value ~ 4
 	return f.Atk + f.Str/10*f.Weapondmg
 }
 
-func (f *Playerchar) GetName() string {
+func (f *playerchar) GetName() string {
 	return f.Name
 }
-
-func (f *Playerchar) GetHealth() int {
-	return f.Health
+func (e *enemy) reportdeath() {
+	fmt.Print(e.Deathcry)
+}
+func (e *enemy) GetName() string {
+	return e.Name
+}
+func (f *playerchar) GetHealth() string {
+	x := strconv.Itoa(f.Health) + "HP"
+	return x
 }
 
 func playerdeath() {
@@ -173,7 +360,7 @@ func playerdeath() {
 	fmt.Println("You died alone. Feels Bad Man.")
 	os.Exit(0)
 }
-func initplayername(player *Playerchar) string {
+func initplayername(player *playerchar) string {
 
 	fmt.Print("\033[25;27H")
 	fmt.Print(SAVECURSOR)
@@ -202,7 +389,7 @@ func initplayername(player *Playerchar) string {
 
 	return playername
 }
-func initplayer(player *Playerchar) { //set initial player values
+func initplayer(player *playerchar) { //set initial player values
 	player.Weapon, player.Weapondmg = "Flail", 2
 	player.Str, player.Dex, player.Int, player.Con, player.Level, player.Atk = 10, 10, 10, 10, 1, 2
 	player.Area = "Castle Iota"
@@ -211,7 +398,9 @@ func initplayer(player *Playerchar) { //set initial player values
 
 }
 
-var compass = "  N\nW-╬-E\n  S"
+var compass = `N
+	               W-╬-E
+	                 S`
 
 func initworld() { //creates all maplocs and enemys
 	cellar1.area = "Cellar"
@@ -234,14 +423,17 @@ func initworld() { //creates all maplocs and enemys
 	cellar3.exits = []int{-1, -1, -1, 2, -1, -1}
 	cellar4.exits = []int{-1, -1, -1, -1, 2, -1}
 
-	cellar1.title = "Western Cellar Room"
-	cellar2.title = "Main Cellar Room"
-	cellar3.title = "Eastern Cellar Room"
-	cellar4.title = "Sub-Basement"
-	cellar1.descrip = "You're standing in the western room of the cellar basement.\nBoxes and crates litter the area. Rat droppings are visible. You're able to move eastward to the central basement.\n"
-	cellar2.descrip = "This area the cellar is a large underground area for storage and staging supplies. Water pipes and air ducts are leading in all directions.\nDarkness surrounds everything and you can hear the furnace.\nYou can go East and go deeper into the basement or West towards the storage area of the basement.\nA separate path leads down into the sub-basement.\n"
-	cellar3.descrip = "You're in the eastern part of the basement. This part of the basement is desecrated and has been decaying for decades.\nYou can hear the furnace to the west. You can go west back towards the central area of the basement.\n"
-	cellar4.descrip = "The sub-basement is littered with rat droppings.\nThe furnance is loud from above and keeps the rats warm in the winter. You can move up the ladder."
+	cellar1.title = `Western Cellar`
+	cellar2.title = ` Main Cellar  `
+	cellar3.title = `Eastern Cellar`
+	cellar4.title = ` Sub-Basement `
+	cellar1.descrip = "You're standing in the western room of the cellar basement. Boxes and crates are stacked the area. Rats have eaten through the boxes. You're able to move eastward to the central basement."
+
+	cellar2.descrip = "This area the cellar is a large underground area for storage and staging supplies. Water pipes and air ducts are leading in all directions. Darkness surrounds everything and you can hear the furnace. You can go East and go deeper into the basement or West towards the storage area of the basement. A separate path leads down into the sub-basement."
+
+	cellar3.descrip = "You're in the eastern part of the basement. This part of the basement is desecrated and has been decaying for decades. You can hear the furnace to the west. You can go west back towards the central area of the basement."
+
+	cellar4.descrip = "The sub-basement is littered with rat corpses and piles of rat treasures and rotting detritus. The furnance is loud from above and keeps the rats warm in the winter. A ladder leads upward back to the Cellar."
 
 	//ENEMY STRUCTS
 	rand.Seed(21)
@@ -268,20 +460,26 @@ func initworld() { //creates all maplocs and enemys
 	rat2.Deathcry = "krEeeeeeeeeppppppsss!!"
 	rat3.Deathcry = "crEeeeeeeeettt!!"
 	bossrat.Deathcry = "crEeeeeeeeettt!!"
-	rat1.Health, rat2.Health, rat3.Health, bossrat.Health = 8, 9, 8, 16
-	cellar1.mobs = []*Enemy{rat1}
-	cellar2.mobs = []*Enemy{rat2}
-	cellar3.mobs = []*Enemy{rat3}
-	cellar4.mobs = []*Enemy{bossrat}
+	rat1.Health, rat2.Health, rat3.Health, bossrat.Health = 12, 11, 14, 19
+	rat1.CurrHealthMax, rat2.CurrHealthMax, rat3.CurrHealthMax, bossrat.CurrHealthMax = 12, 11, 14, 19
+	cellar1.mobs = []*enemy{rat1}
+	cellar2.mobs = []*enemy{rat2}
+	cellar3.mobs = []*enemy{rat3}
+	cellar4.mobs = []*enemy{bossrat}
 }
-func (en *Enemy) ratbite(target *Playerchar) int {
-	return en.Atk + int(drawrand4()) //returns uint8 to subtract from playerhp
+func (e *enemy) Rend(target citentity) int {
+	return e.Atk + int(drawrand4()) //returns uint8 to subtract from playerhp
 }
 
-func (en *Enemy) GetHealth() int {
-	return en.Health
+func (e *enemy) GetHealth() string {
+	x := strconv.Itoa(e.Health) + "HP"
+	return x
 }
-func (en *Enemy) Ratnamegen() {
+func (e *enemy) Updatehp(x int) {
+	(*e).Health = x
+}
+
+func (e *enemy) Ratnamegen() {
 
 	ratnames1 := []string{
 		0: "Bo",
@@ -298,7 +496,7 @@ func (en *Enemy) Ratnamegen() {
 		4: "kansta",
 	}
 
-	(*en).Name = ratnames1[random(0, 5)] + ratnames2[random(0, 5)]
+	(*e).Name = ratnames1[random(0, 5)] + ratnames2[random(0, 5)]
 }
 
 func drawtitle() {
@@ -307,8 +505,8 @@ func drawtitle() {
 		fmt.Println(text)
 	}
 	//titlebar1 := strings.Repeat("═", 140)
-	fmt.Println("\n\n")
-	color.Set(color.FgRed)
+	fmt.Printf("\n\n\n")
+	conred()
 }
 
 func readblock(t []string) {
@@ -344,7 +542,7 @@ func storyintro() {
 
 }
 
-func drawplayerbar(player *Playerchar) {
+func drawplayerbar(player *playerchar) {
 	fmt.Print(ZEROHOME)
 	titlebar1 := strings.Repeat("═", 140)
 	color.Set(color.FgBlue)
@@ -369,10 +567,9 @@ func drawplayerbar(player *Playerchar) {
 	//Draw bottom blue bar
 	color.Set(color.FgBlue)
 	fmt.Println(titlebar1)
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 
 }
-func drawplayertitleframe(player *Playerchar) {
+func drawplayertitleframe(player *playerchar) {
 	skulldrawdown()
 	titlebar1 := strings.Repeat("═", 140)
 	fmt.Print(PLAYERINFOHOME) //removed Println
@@ -410,7 +607,7 @@ func yn() string {
 	return string(char)
 }
 
-func OKP() rune {
+func getcharpause() rune {
 	char, _, err := keyboard.GetSingleKey()
 	if err != nil {
 		panic(err)
@@ -437,31 +634,33 @@ func random(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-const (
-	ANIMATEDELAY        = 100
-	ANIMATEDELAYSMALL   = 50
-	MINHEALTH           = 0
-	BASEDAM             = 6
-	ZEROHOME            = "\033[0;0H"
-	HOME                = "\033[12;0H" //to line 12
-	HIDECURSOR          = "\033[?25l"
-	PLAYERINFOHOME      = "\033[11;0H"
-	NAVAREA             = "\033[09;0H"
+const ( //test comment
+
+	ANIMATEDELAY        = 100           //as
+	ANIMATEDELAYSMALL   = 50            //
+	MINHEALTH           = 0             //
+	BASEDAM             = 6             //
+	ZEROHOME            = "\033[0;0H"   //
+	HOME                = "\033[12;0H"  //to line 12
+	HIDECURSOR          = "\033[?25l"   //
+	PLAYERINFOHOME      = "\033[11;0H"  //
+	NAVAREA             = "\033[09;16H" //
 	NAVLOC              = "\033[04;0H"
-	NAVDESCRIP          = "\033[11;0H"
-	NAVTRAVEL           = "\033[18;0H"
-	ENEMIESLISTED       = "\033[19;0H"
-	HEALTHBAR           = "\033[4;40H"
-	HEALTHBARFILL       = "\033[4;41H"
-	NAVTRAVELOUTPUT     = "\033[17;0H"
-	PLAYERPROMPT        = "\033[21;0H"
-	PLAYERMOVEMENT      = "\033[22;0H"
-	ATTACKSTART         = "\033[6;0H"
-	COMBATSTART         = "\033[23;0H"
-	DELETETOENDOFLINE   = "\033[K"
-	SAVECURSOR          = "\033[s"
-	RETURNTOSAVEDCURSOR = "\033[u"
-	RESETCOLORS         = "\033[0m"
+	COMPASSDRAW         = "\033[4;26H" //
+	NAVDESCRIP          = "\033[11;0H" //
+	NAVTRAVEL           = "\033[18;0H" //
+	ENEMIESLISTED       = "\033[19;0H" //
+	HEALTHBAR           = "\033[4;40H" //
+	HEALTHBARFILL       = "\033[4;41H" //
+	ENEMYHEALTHBAR      = "\033[6;40H" //
+	ENEMYHEALTHBARFILL  = "\033[6;41H" //
+	NAVTRAVELOUTPUT     = "\033[17;0H" //
+	ATTACKSTART         = "\033[6;0H"  //
+	COMBATSTART         = "\033[23;0H" //
+	DELETETOENDOFLINE   = "\033[K"     //
+	SAVECURSOR          = "\033[s"     //
+	RETURNTOSAVEDCURSOR = "\033[u"     //
+	RESETCOLORS         = "\033[0m"    //
 )
 
 func rndtime() time.Duration {

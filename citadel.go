@@ -2,14 +2,21 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
 )
 
-type Playerchar struct {
+type citentity interface {
+	hitroll(int) bool
+	isalive() bool
+	GetName() string
+	GetHealth() string
+	getdamageroll() int
+}
+
+type playerchar struct {
 	Name          string
 	Health        int
 	CurrHealthMax int
@@ -26,15 +33,16 @@ type Playerchar struct {
 	totxp         int
 }
 
-type Enemy struct {
-	Name      string
-	Typeofen  string
-	Typeofatk string
-	Atk       int
-	Battlecry string
-	Deathcry  string
-	Health    int
-	worthxp   int
+type enemy struct {
+	Name          string
+	Typeofen      string
+	Typeofatk     string
+	Atk           int
+	Battlecry     string
+	Deathcry      string
+	Health        int
+	CurrHealthMax int
+	worthxp       int
 }
 
 type maploc struct {
@@ -43,52 +51,78 @@ type maploc struct {
 	area    string
 	descrip string
 	title   string
-	mobs    []*Enemy
+	mobs    []*enemy
 	exits   []int // value of -1 = cant go , predefined list of end point rooms for each room, adjacency map. eg -1,-1,3,1,-1,-1
 }
 
-func playerprompt(player *Playerchar) string {
-	fmt.Print("\n")
-	promptval := strings.ToUpper(player.Name + "═")
-	prompthp := strconv.Itoa(int(player.Health))
-	return promptval + string(prompthp) + "HP═>"
+func conred() {
+	color.Set(color.FgRed, color.Bold, color.BgBlack)
+}
+
+func entprompt(thing citentity) string {
+	promptval := strings.ToUpper("░░░▒▒▓ " + thing.GetName() + " ▓▒▒░░░ ")
+	return promptval
+}
+func printcompass() {
+	color.Set(color.FgWhite, color.Bold, color.BgBlack)
+	fmt.Print(COMPASSDRAW)
+	fmt.Print(compass)
+}
+func (l *maploc) printmap() {
+	fmt.Print(NAVLOC)
+	conred()
+	fmt.Printf("Detailed Map:\n%v\n", l.grid)
+	color.Set(color.FgWhite, color.Bold, color.BgBlack)
+	fmt.Print(NAVAREA)
+	color.Set(color.FgYellow, color.Bold, color.BgBlack)
+	fmt.Printf("╠═%v═╣\n\n", l.title)
+
+	color.Set(color.FgCyan, color.Bold, color.BgBlack)
+	fmt.Print(NAVDESCRIP)
+	fmt.Printf(" ¬│░░░░▒▒▒▒▒▒▓▓▓▓▓▌DESCRIPTION▐▓▓▓▓▓▒▒▒▒▒▒░░░░│⌐ \n")
+	l.printdescrip()
+	printcompass()
+}
+
+func (l maploc) printdescrip() {
+	var counter int
+	for _, x := range l.descrip {
+		counter++
+		fmt.Print(string(x))
+		if counter == 53 { //Number of rows for column
+			fmt.Print("\n")
+			counter = 0
+		}
+	}
+
 }
 
 func generatemaplocdata(loc *maploc) {
-	color.Set(color.FgYellow, color.Bold, color.BgBlack)
-	fmt.Print(NAVAREA)
-	fmt.Printf("Area: ╠═%v═╣\n\n", loc.title)
-	fmt.Print(NAVLOC)
-	color.Set(color.FgRed, color.Bold, color.BgBlack)
-	fmt.Printf("Detailed Map:\n%v\n", loc.grid)
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Println(compass)
-	color.Set(color.FgCyan, color.Bold, color.BgBlack)
-	fmt.Print(NAVDESCRIP)
-	fmt.Println("~~░░▒ DESCRIPTION ▒░░~~")
-	fmt.Println(loc.descrip)
+
+	loc.printmap()
 	fmt.Print(NAVTRAVEL)
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
-	fmt.Println("Use n,s,e,w   u(travel upwards),d(descend)  b=battle i=inventory q=stats l=look ")
+	fmt.Printf("Use n,s,e,w   u(up),d(down)  b=battle i=view iventory\nq=View %v Stats l=look ", p1.Name)
 
 }
 
-func checkbattle(player *Playerchar, mob *Enemy) {
+func checkbattle(player *playerchar, mob *enemy) {
 	fmt.Print(ENEMIESLISTED)
-	color.Set(color.FgRed, color.Bold, color.BgBlack) //movecursor
+	conred()
 
 	if mob.Health <= 0 {
 		color.Set(color.FgWhite, color.BgBlack)
 		fmt.Printf("\nThe corpse of %v the %v is here.\n", mob.Name, mob.Typeofen)
 	} else if mob.Health > 0 {
-		fmt.Printf("\n%v the %v is here.", mob.Name, mob.Typeofen)
+		fmt.Printf("\n%v the %v is here.\n", mob.Name, mob.Typeofen)
 	}
 
 	time.Sleep(time.Millisecond * 200)
 }
 
-func playercantgo(player *Playerchar, c rune) {
-	fmt.Print(PLAYERPROMPT)
+func playercantgo(player *playerchar, c rune) {
+	entprompt(player)
+
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	switch c {
 	case 'n':
@@ -107,11 +141,11 @@ func playercantgo(player *Playerchar, c rune) {
 
 	time.Sleep(time.Millisecond * 650)
 }
-func checkmove(player *Playerchar, exits []int) {
-	color.Set(color.FgHiMagenta, color.Bold, color.BgBlack)
-	fmt.Printf(playerprompt(player))
+func checkmove(player *playerchar, exits []int) {
+	//color.Set(color.FgHiMagenta, color.Bold, color.BgBlack)
+	//fmt.Printf(entprompt(player))
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	switch OKP() {
+	switch getcharpause() {
 	case 'n':
 		switch exits[0] {
 		case -1:
@@ -173,13 +207,14 @@ func checkmove(player *Playerchar, exits []int) {
 		}
 	case 'b':
 		player.battleinit()
-
+	case 'q':
+		player.printstats()
 	}
 	time.Sleep(time.Millisecond * 400)
 	navigator(player)
 }
 
-func navigator(player *Playerchar) {
+func navigator(player *playerchar) {
 	clear()
 	drawplayerbar(player)
 	player.makehealthbar()
@@ -189,7 +224,7 @@ func navigator(player *Playerchar) {
 	case 1:
 		generatemaplocdata(cellar1)
 		checkbattle(player, rat1)
-		checkmove(player, cellar1.exits) //passes to checkmove: pointer to Playerchar struct and slice of string from maploc
+		checkmove(player, cellar1.exits) //passes to checkmove: pointer to playerchar struct and slice of string from maploc
 	case 2:
 		generatemaplocdata(cellar2)
 		checkbattle(player, rat2)
@@ -208,20 +243,22 @@ func navigator(player *Playerchar) {
 
 }
 
+var p1 playerchar
+
 func main() {
 
 	titleintro()
 	storyintro()
-	//              //temp - remove after titleintro and storyintro are back in
-	P1 := new(Playerchar)          //creates player struct
+	//clear()                        //temp - remove after titleintro and storyintro are back in
+	p1 := new(playerchar)          //creates player struct
 	initworld()                    //sets up Enemies and maplocs
-	initplayer(P1)                 //set initial player values
-	P1.SetName(initplayername(P1)) //set name and confirm choice
-	P1.SetHealth()
-	tutintro(P1)
-	OKP() //PAUSE
+	initplayer(p1)                 //set initial player values
+	p1.SetName(initplayername(p1)) //set name and confirm choice
+	p1.SetHealth()
+	//tutintro(P1)
+	getcharpause() //PAUSE
 
 	//todo: create functions for main loop and combat loops and drawing each room
-	navigator(P1) //??? calls drawplayerbar and generates room data
+	navigator(p1) //??? calls drawplayerbar and generates room data
 
 }
