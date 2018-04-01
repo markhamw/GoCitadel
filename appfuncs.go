@@ -97,85 +97,178 @@ func (f *playerchar) makehealthbar() {
 	fmt.Printf(HEALTHBARFILL)
 	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(f.Health, f.CurrHealthMax))/10))
 }
-func (f *playerchar) updatehealthbar() {
-	if f.Health <= 0 {
-		playerdeath()
-	}
-	fmt.Printf(HEALTHBAR)
-	fmt.Print(DELETETOENDOFLINE)
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Printf("[")
-	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(f.CurrHealthMax, f.CurrHealthMax))/10))
-	fmt.Printf("]")
-	fmt.Printf(HEALTHBARFILL)
-	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(f.Health, f.CurrHealthMax))/10))
-	fmt.Print(RETURNTOSAVEDCURSOR)
-}
-func (e *enemy) updatehealthbar() {
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	if e.Health <= 0 {
-		e.reportdeath()
-	}
-	fmt.Printf(ENEMYHEALTHBAR)
-	fmt.Print(DELETETOENDOFLINE)
-	conred()
-	fmt.Printf("[")
-	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(e.CurrHealthMax, e.CurrHealthMax))/10))
-	fmt.Printf("]")
-	fmt.Printf(ENEMYHEALTHBARFILL)
-	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(e.Health, e.CurrHealthMax))/10))
-	fmt.Print(RETURNTOSAVEDCURSOR)
-}
-func (e *enemy) makehealthbar() {
-	if e.Health <= 0 {
-		e.reportdeath()
-	}
-	fmt.Print(ENEMYHEALTHBAR)
-	conred()
-	fmt.Printf("[")
-	fmt.Printf(strings.Repeat(" ", int(percent.PercentOf(e.CurrHealthMax, e.CurrHealthMax))/10))
-	fmt.Printf("]")
-	fmt.Print(ENEMYHEALTHBARFILL)
-	fmt.Printf(strings.Repeat("▓", int(percent.PercentOf(e.Health, e.CurrHealthMax))/10))
-}
 
 func (f *playerchar) brpds(e *enemy) {
-	if f.isalive() && e.isalive() {
-		color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 
+	if (f.isalive() && e.isalive()) == true {
 		x := f.getdamageroll()
 		e.Updatehp(e.Health - x)
-
-		fmt.Printf("\n\t%v«%v» %v %v with %v for %v\n", entprompt(f), f.GetHealth(), f.attackstring(), e.GetName(), f.Weapon, strconv.Itoa(x))
+		fmt.Printf("\n%v«%v» %v %v with %v for %v\n", entprompt(f), f.GetHealth(), f.attackstring(), e.GetName(), f.Weapon, strconv.Itoa(x))
 		time.Sleep(time.Millisecond * 2000)
-	} else {
+
+	} else if f.isalive() == false {
 		playerdeath()
+	} else if e.isalive() == false {
+		e.reportdeath(f)
 	}
 
 } //battle report details string
 
-func (f *playerchar) brmiss() { //battle report MISS
+func (f *playerchar) brmiss(e *enemy) { //battle report MISS
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Printf("\n\t%v«%v» %v\n", entprompt(f), f.GetHealth(), f.miss())
+	fmt.Printf("\n%v«%v» %v %v\n", entprompt(f), f.GetHealth(), f.miss(), e.GetName())
 	time.Sleep(time.Millisecond * 2000)
 }
 
 func (e *enemy) enemybrpds(p *playerchar) {
+	conwhite()
+
 	if e.isalive() && p.isalive() {
-		conred()
 		x := e.getdamageroll()
 		p.Updatehp(p.Health - x)
-		fmt.Printf("\n\t%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
+		fmt.Printf("\n%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
 		time.Sleep(time.Millisecond * 2000)
-	} else {
-		e.reportdeath()
+
+	} else if p.isalive() == false {
+		playerdeath()
+	} else if e.isalive() == false {
+		e.reportdeath(p)
+
 	}
 
 }
+func playercantgo(player *playerchar, c rune) {
+	entprompt(player)
 
-func (e *enemy) enemybrpdsmiss() {
-	conred()
-	fmt.Printf("\n\t%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.GetName(), e.miss())
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	switch c {
+	case 'n':
+		fmt.Printf("%v cannot move north any farther.", strings.ToTitle(player.Name))
+	case 's':
+		fmt.Printf("%v is entirely unable to travel further south.", strings.ToTitle(player.Name))
+	case 'e':
+		fmt.Printf("%v can't go further east.", strings.ToTitle(player.Name))
+	case 'w':
+		fmt.Printf("%v can't head further west.", strings.ToTitle(player.Name))
+	case 'd':
+		fmt.Printf("You want to burrow into the ground? Figure out something else, %v.", strings.ToTitle(player.Name))
+	case 'u':
+		fmt.Printf("You wot mate? Can't go up here, %v.", strings.ToTitle(player.Name))
+	}
+
+	time.Sleep(time.Millisecond * 650)
+}
+func checkmove(player *playerchar, exits []int) {
+	//color.Set(color.FgHiMagenta, color.Bold, color.BgBlack)
+	//fmt.Printf(entprompt(player))
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+	switch getcharpause() {
+	case 'n':
+		switch exits[0] {
+		case -1:
+			playercantgo(player, 'n')
+			break
+		default:
+			fmt.Printf("%v heads north", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[0])
+
+		}
+
+	case 's':
+		switch exits[1] {
+		case -1:
+			playercantgo(player, 's')
+			break
+		default:
+			fmt.Printf("%v heads south", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[1])
+		}
+
+	case 'e':
+
+		switch exits[2] {
+		case -1:
+			playercantgo(player, 'e')
+			break
+		default:
+			fmt.Printf("%v heads east", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[2])
+		}
+
+	case 'w':
+		switch exits[3] {
+		case -1:
+			playercantgo(player, 'w')
+			break
+		default:
+			fmt.Printf("%v heads west", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[3])
+		}
+	case 'u':
+		switch exits[4] {
+		case -1:
+			playercantgo(player, 'u')
+			break
+		default:
+			fmt.Printf("%v goes up", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[4])
+		}
+	case 'd':
+		switch exits[5] {
+		case -1:
+			playercantgo(player, 'd')
+			break
+		default:
+			fmt.Printf("%v heads downward", strings.ToTitle((player.Name)))
+			player.location = uint8(exits[5])
+		}
+	case 'b':
+		player.battleinit()
+	case 'q':
+		player.printstats()
+	}
+	time.Sleep(time.Millisecond * 400)
+	navigator(player)
+}
+
+func (l maploc) printdescrip() {
+	fmt.Print(NAVDESCRIP)
+	fmt.Printf(" ¬│░░░░▒▒▒▒▒▒▓▓▓▓▓▌DESCRIPTION▐▓▓▓▓▓▒▒▒▒▒▒░░░░│⌐ \n")
+	fmt.Print(l.descrip)
+}
+
+func navigator(player *playerchar) {
+	clear()
+	drawplayerbar(player)
+	player.makehealthbar()
+	color.Set(color.FgYellow, color.Bold, color.BgBlack)
+
+	switch player.location {
+	case 1:
+		generatemaplocdata(cellar1, player)
+		checkbattle(player, rat1)
+		checkmove(player, cellar1.exits) //passes to checkmove: pointer to playerchar struct and slice of string from maploc
+	case 2:
+		generatemaplocdata(cellar2, player)
+		checkbattle(player, rat2)
+		checkmove(player, cellar2.exits)
+	case 3:
+		generatemaplocdata(cellar3, player)
+		checkbattle(player, rat3)
+		checkmove(player, cellar3.exits)
+	case 4:
+		generatemaplocdata(cellar4, player)
+		checkbattle(player, bossrat)
+		checkmove(player, cellar4.exits)
+	}
+
+	time.Sleep(time.Millisecond * 2000)
+
+}
+func (e *enemy) enemybrpdsmiss(p *playerchar) {
+	color.Set(color.FgWhite, color.Bold, color.BgBlack)
+	fmt.Printf("\n%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.miss(), p.GetName())
 	time.Sleep(time.Millisecond * 2000)
 }
 
@@ -184,13 +277,13 @@ func battreport(p *playerchar, en *enemy) {
 		if p.hitroll(10) {
 			p.brpds(en)
 		} else {
-			p.brmiss()
+			p.brmiss(en)
 		}
 
 		if en.hitroll(7) { //difficulty modifier?? //increase to increase liklihood of hitting
 			en.enemybrpds(p)
 		} else {
-			en.enemybrpdsmiss()
+			en.enemybrpdsmiss(p)
 		}
 	}
 
@@ -198,22 +291,35 @@ func battreport(p *playerchar, en *enemy) {
 
 func (e *enemy) miss() string {
 	x := []string{
-		0: "tries to bite and misses",
-		1: "tries to hit!, and misses.",
-		2: "squeeks and grits its teeth.",
-		3: "gets dodged on.",
-		4: "leaves a dropping",
+		0: "misses",
+		1: "almost gnaws",
+		2: "squeeks and grits its teeth angrily at",
+		3: "gets dodged on by",
+		4: "runs around aimlessly near",
 	}
 	return x[rand.Intn(5)]
 }
 
+func checkbattle(player *playerchar, mob *enemy) {
+	fmt.Print(ENEMIESLISTED)
+	conred()
+
+	if mob.Health <= 0 {
+		color.Set(color.FgWhite, color.BgBlack)
+		fmt.Printf("\nThe corpse of %v the %v is here.\n", mob.Name, mob.Typeofen)
+	} else if mob.Health > 0 {
+		fmt.Printf("\n%v the %v is here.\n", mob.Name, mob.Typeofen)
+	}
+
+	time.Sleep(time.Millisecond * 200)
+}
 func (f *playerchar) miss() string {
 	x := []string{
-		0: "misses.",
-		1: "tries to hit!, and misses.",
-		2: "grunts and swings wide.",
-		3: "gets dodged on.",
-		4: "almost hit!",
+		0: "misses",
+		1: "barely misses",
+		2: "fumbles and misses",
+		3: "gets dodged on by",
+		4: "almost hit",
 	}
 	return x[rand.Intn(5)]
 }
@@ -230,10 +336,10 @@ func (e *enemy) attackstring() string {
 }
 func (f *playerchar) attackstring() string {
 	x := []string{
-		0: "grazes",
+		0: "crushes",
 		1: "hits",
 		2: "damages",
-		3: "deflects",
+		3: "smashes",
 		4: "wollops",
 	}
 	return x[rand.Intn(5)]
@@ -249,11 +355,32 @@ func (f *playerchar) attack(mob *enemy) {
 		} else {
 			battreport(f, mob)
 		}
-
+		f.addxp(mob.getxpworth())
+		f.kills++
 	}
 
 }
 
+func generatemaplocdata(loc *maploc, p *playerchar) {
+	loc.printmap()
+	fmt.Print(NAVTRAVEL)
+	color.Set(color.FgYellow, color.Bold, color.BgBlack)
+	fmt.Print("Use n,s,e,w   u(up),d(down)  b=battle i=check iventory\nq=char info l=look")
+	p.checklvl()
+}
+func (l *maploc) printmap() {
+	fmt.Print(NAVLOC)
+	conred()
+	fmt.Printf("Detailed Map:\n%v\n", l.grid)
+	conwhite()
+	fmt.Print(NAVAREA)
+	color.Set(color.FgYellow, color.Bold, color.BgBlack)
+	fmt.Printf("╠═%v═╣\n\n", l.title)
+	color.Set(color.FgCyan, color.Bold, color.BgBlack)
+
+	l.printdescrip()
+	printcompass()
+}
 func (f *playerchar) getmaploc() string {
 	var x string
 	switch f.location {
@@ -305,6 +432,8 @@ func (f *playerchar) checklvl() {
 		f.levup()
 	} else if f.totxp == 3000 {
 		f.levup()
+	} else {
+		return
 	}
 
 }
@@ -320,22 +449,25 @@ func (f *playerchar) levup() {
 	f.Int++
 	f.SetHealth()
 	f.Updatehp(f.CurrHealthMax)
-	color.Set(color.FgBlue, color.Bold, color.BgBlack)
+	conblue()
 	fmt.Printf("%v gained a Level!!!\n", strings.ToUpper(f.Name))
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 	fmt.Printf("Str +1\nCon +1\nAtk+1\nInt+1\n")
-	fmt.Printf("New XP total: %v\n", f.totxp)
+	fmt.Printf("New XP total: %v\n", f.gettotalxp())
 	time.Sleep(time.Millisecond * 2300)
 
+}
+func (f *playerchar) gettotalxp() string {
+	return strconv.Itoa(f.totxp)
 }
 func (f *playerchar) printstats() {
 	clear()
 	drawplayerbar(f)
 	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
-	fmt.Print(entprompt(f))
-	fmt.Printf("\nBase Attack Power: %v (Using %v)\n\n", f.Atk, f.Weapon)
+	fmt.Printf("\nBase Atk: %v (Using %v)\n\n", f.Atk, f.Weapon)
 	fmt.Printf("░ STR:%v ░ DEX:%v ░ CON:%v ░ INT:%v ░\n\n", f.Str, f.Dex, f.Con, f.Int)
-	fmt.Printf("Total XP: %v\n\n", f.totxp)
+	fmt.Printf("Total XP: %v\n", f.gettotalxp())
+	fmt.Printf("Total Kills: %v\n\n", f.kills)
 	fmt.Printf("Current location: %v\n\n", f.getmaploc())
 	fmt.Println("PRESS ANY KEY TO CONTINUE..")
 	getcharpause()
@@ -358,13 +490,20 @@ func (f *playerchar) Rend(e *enemy) int {
 func (f *playerchar) GetName() string {
 	return f.Name
 }
-func (e *enemy) reportdeath() {
-	fmt.Printf("\t%v dies and cries out: \"%v\"", e.Name, e.Deathcry)
-	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
-	fmt.Printf("\n\n\t%v is slain. %v XP awarded.", e.Name, e.worthxp)
-	time.Sleep(time.Millisecond * 2000)
-	p1.addxp(e.worthxp)
+func (e *enemy) reportdeath(p *playerchar) {
 
+	fmt.Printf("%v dies and cries out: \"%v\"", e.Name, e.Deathcry)
+	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
+	fmt.Printf("\n\n%v is slain. %v XP awarded.", e.Name, e.worthxp)
+	time.Sleep(time.Millisecond * 2000)
+	p.addxp(e.getxpworth())
+	p.kills++
+	time.Sleep(time.Millisecond * 500)
+	p.checklvl()
+}
+
+func (e *enemy) getxpworth() int {
+	return e.worthxp
 }
 func (e *enemy) GetName() string {
 	return e.Name
@@ -409,6 +548,11 @@ func initplayername(player *playerchar) string {
 
 	return playername
 }
+func tutintro(player *playerchar) {
+	drawplayertitleframe(player)
+	fmt.Println(castle)
+	readblock(castletext)
+}
 func initplayer(player *playerchar) { //set initial player values
 	player.Weapon, player.Weapondmg = "Flail", 2
 	player.Str, player.Dex, player.Int, player.Con, player.Level, player.Atk = 10, 10, 10, 10, 1, 2
@@ -445,7 +589,7 @@ func initworld() { //creates all maplocs and enemys
 	cellar2.title = ` Main Cellar  `
 	cellar3.title = `Eastern Cellar`
 	cellar4.title = ` Sub-Basement `
-	cellar1.descrip = "You're standing in the western room of the cellar\nbasement. Boxes and crates are stacked the area. Rats have gnawed the\nboxes to bits. You're able to move eastward to the central basement.\n"
+	cellar1.descrip = "You're standing in the western room of the cellar\nbasement. Boxes and crates are stacked the area.\nRats have gnawed the boxes to bits. You're able\nto move eastward to the central basement.\n"
 
 	cellar2.descrip = "This area the cellar is a large underground area\nfor storage and staging supplies. Water pipes and\nair ducts are leading in all directions. Darkness\nsurrounds everything and you can hear the furnace.\nYou can go East and go deeper into the basement or\nWest towards the storage area of the basement. A\nseparate path leads down into the sub-basement.\n"
 
@@ -643,37 +787,57 @@ func random(min, max int) int {
 
 const ( //test comment
 
-	ANIMATEDELAY        = 100           //as
-	ANIMATEDELAYSMALL   = 50            //
-	MINHEALTH           = 0             //
-	BASEDAM             = 6             //
-	ZEROHOME            = "\033[0;0H"   //
-	HOME                = "\033[12;0H"  //to line 12
-	HIDECURSOR          = "\033[?25l"   //
-	PLAYERINFOHOME      = "\033[11;0H"  //
-	NAVAREA             = "\033[09;16H" //
-	NAVLOC              = "\033[04;0H"
-	COMPASSDRAW1        = "\033[4;26H" //
-	COMPASSDRAW2        = "\033[5;24H" //
-	COMPASSDRAW3        = "\033[6;26H" //
-	NAVDESCRIP          = "\033[11;0H" //
-	NAVTRAVEL           = "\033[18;0H" //
-	ENEMIESLISTED       = "\033[19;0H" //
-	HEALTHBAR           = "\033[4;40H" //
-	HEALTHBARFILL       = "\033[4;41H" //
-	ENEMYHEALTHBAR      = "\033[6;40H" //
-	ENEMYHEALTHBARFILL  = "\033[6;41H" //
-	NAVTRAVELOUTPUT     = "\033[17;0H" //
-	ATTACKSTART         = "\033[6;0H"  //
-	COMBATSTART         = "\033[23;0H" //
-	DELETETOENDOFLINE   = "\033[K"     //
-	SAVECURSOR          = "\033[s"     //
-	RETURNTOSAVEDCURSOR = "\033[u"     //
-	RESETCOLORS         = "\033[0m"    //
+	ANIMATEDELAY      = 100           //as
+	ANIMATEDELAYSMALL = 50            //
+	MINHEALTH         = 0             //
+	BASEDAM           = 6             //
+	ZEROHOME          = "\033[0;0H"   //
+	HOME              = "\033[12;0H"  //to line 12
+	HIDECURSOR        = "\033[?25l"   //
+	PLAYERINFOHOME    = "\033[11;0H"  //
+	NAVAREA           = "\033[09;16H" //
+	NAVLOC            = "\033[04;0H"
+	COMPASSDRAW1      = "\033[4;26H" //
+	COMPASSDRAW2      = "\033[5;24H" //
+	COMPASSDRAW3      = "\033[6;26H" //
+	NAVDESCRIP        = "\033[11;0H" //
+	NAVTRAVEL         = "\033[18;0H" //
+	ENEMIESLISTED     = "\033[19;0H" //
+	HEALTHBAR         = "\033[4;40H" //
+	HEALTHBARFILL     = "\033[4;41H" //
+	NAVTRAVELOUTPUT   = "\033[26;0H" //
+	ATTACKSTART       = "\033[6;0H"  //
+	//COMBATSTART         = "\033[23;0H" //
+	DELETETOENDOFLINE   = "\033[K"  //
+	SAVECURSOR          = "\033[s"  //
+	RETURNTOSAVEDCURSOR = "\033[u"  //
+	RESETCOLORS         = "\033[0m" //
 )
 
 func rndtime() time.Duration {
 	rand.Seed(time.Now().UnixNano())
 	randms := time.Duration(rand.Intn(10))
 	return randms
+}
+func conred() {
+	color.Set(color.FgRed, color.Bold, color.BgBlack)
+}
+func conwhite() {
+	color.Set(color.FgWhite, color.Bold, color.BgBlack)
+}
+func conblue() {
+	color.Set(color.FgBlue, color.Bold, color.BgBlack)
+}
+func entprompt(thing citentity) string {
+	promptval := strings.ToUpper("░▒▓▌" + thing.GetName() + "▐▓▒░")
+	return promptval
+}
+func printcompass() {
+	conwhite()
+	fmt.Print(COMPASSDRAW1)
+	fmt.Print(compass[0])
+	fmt.Print(COMPASSDRAW2)
+	fmt.Print(compass[1])
+	fmt.Print(COMPASSDRAW3)
+	fmt.Print(compass[2])
 }

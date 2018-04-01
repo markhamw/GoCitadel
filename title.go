@@ -203,12 +203,6 @@ var skull = [26]string{
 	20: "                                `             '",
 }
 
-func tutintro(player *playerchar) {
-	drawplayertitleframe(player)
-	fmt.Println(castle)
-	readblock(castletext)
-}
-
 var ratimage1 = []string{
 	0: ",,==.",
 	1: "//    `",
