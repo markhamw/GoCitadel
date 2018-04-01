@@ -65,8 +65,12 @@ func entprompt(thing citentity) string {
 }
 func printcompass() {
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print(COMPASSDRAW)
-	fmt.Print(compass)
+	fmt.Print(COMPASSDRAW1)
+	fmt.Print(compass[0])
+	fmt.Print(COMPASSDRAW2)
+	fmt.Print(compass[1])
+	fmt.Print(COMPASSDRAW3)
+	fmt.Print(compass[2])
 }
 func (l *maploc) printmap() {
 	fmt.Print(NAVLOC)
@@ -76,7 +80,6 @@ func (l *maploc) printmap() {
 	fmt.Print(NAVAREA)
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
 	fmt.Printf("╠═%v═╣\n\n", l.title)
-
 	color.Set(color.FgCyan, color.Bold, color.BgBlack)
 	fmt.Print(NAVDESCRIP)
 	fmt.Printf(" ¬│░░░░▒▒▒▒▒▒▓▓▓▓▓▌DESCRIPTION▐▓▓▓▓▓▒▒▒▒▒▒░░░░│⌐ \n")
@@ -89,10 +92,6 @@ func (l maploc) printdescrip() {
 	for _, x := range l.descrip {
 		counter++
 		fmt.Print(string(x))
-		if counter == 53 { //Number of rows for column
-			fmt.Print("\n")
-			counter = 0
-		}
 	}
 
 }
@@ -103,7 +102,7 @@ func generatemaplocdata(loc *maploc) {
 	fmt.Print(NAVTRAVEL)
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
 	fmt.Printf("Use n,s,e,w   u(up),d(down)  b=battle i=view iventory\nq=View %v Stats l=look ", p1.Name)
-
+	p1.checklvl()
 }
 
 func checkbattle(player *playerchar, mob *enemy) {
@@ -246,6 +245,8 @@ func navigator(player *playerchar) {
 var p1 playerchar
 
 func main() {
+	//defer termbox.Close()
+	//termbox.Init()
 
 	titleintro()
 	storyintro()

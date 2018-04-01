@@ -54,17 +54,23 @@ func isstanding(character citentity) bool {
 }
 
 func (e *enemy) isalive() bool {
+	var x bool
 	if e.Health > 0 {
-		return true
+		x = true
+	} else if e.Health <= 0 {
+		x = false
 	}
-	return false
+	return x
 }
 
 func (f *playerchar) isalive() bool {
+	var x bool
 	if f.Health > 0 {
-		return true
+		x = true
+	} else if f.Health <= 0 {
+		x = false
 	}
-	return false
+	return x
 }
 
 func (e *enemy) hitroll(max int) bool {
@@ -106,6 +112,7 @@ func (f *playerchar) updatehealthbar() {
 	fmt.Print(RETURNTOSAVEDCURSOR)
 }
 func (e *enemy) updatehealthbar() {
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	if e.Health <= 0 {
 		e.reportdeath()
 	}
@@ -133,30 +140,42 @@ func (e *enemy) makehealthbar() {
 }
 
 func (f *playerchar) brpds(e *enemy) {
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	x := f.getdamageroll()
-	e.Updatehp(e.Health - x)
-	fmt.Printf("\t%v«%v» %v %v with %v for %v\n", entprompt(f), f.GetHealth(), f.attackstring(), e.GetName(), f.Weapon, strconv.Itoa(x))
-	time.Sleep(time.Millisecond * 2000)
+	if f.isalive() && e.isalive() {
+		color.Set(color.FgGreen, color.Bold, color.BgBlack)
+
+		x := f.getdamageroll()
+		e.Updatehp(e.Health - x)
+
+		fmt.Printf("\n\t%v«%v» %v %v with %v for %v\n", entprompt(f), f.GetHealth(), f.attackstring(), e.GetName(), f.Weapon, strconv.Itoa(x))
+		time.Sleep(time.Millisecond * 2000)
+	} else {
+		playerdeath()
+	}
+
 } //battle report details string
 
 func (f *playerchar) brmiss() { //battle report MISS
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Printf("\t%v«%v» %v\n", entprompt(f), f.GetHealth(), f.miss())
+	fmt.Printf("\n\t%v«%v» %v\n", entprompt(f), f.GetHealth(), f.miss())
 	time.Sleep(time.Millisecond * 2000)
 }
 
 func (e *enemy) enemybrpds(p *playerchar) {
-	conred()
-	x := e.getdamageroll()
-	p.Updatehp(p.Health - x)
-	fmt.Printf("\t%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
-	time.Sleep(time.Millisecond * 2000)
+	if e.isalive() && p.isalive() {
+		conred()
+		x := e.getdamageroll()
+		p.Updatehp(p.Health - x)
+		fmt.Printf("\n\t%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
+		time.Sleep(time.Millisecond * 2000)
+	} else {
+		e.reportdeath()
+	}
+
 }
 
 func (e *enemy) enemybrpdsmiss() {
 	conred()
-	fmt.Printf("\t%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.GetName(), e.miss())
+	fmt.Printf("\n\t%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.GetName(), e.miss())
 	time.Sleep(time.Millisecond * 2000)
 }
 
@@ -232,11 +251,7 @@ func (f *playerchar) attack(mob *enemy) {
 		}
 
 	}
-	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
-	fmt.Printf("\n\n\t%v is slain. %v XP awarded.", mob.Name, mob.worthxp)
-	time.Sleep(time.Millisecond * 2000)
-	f.addxp(mob.worthxp)
-	f.checklvl()
+
 }
 
 func (f *playerchar) getmaploc() string {
@@ -344,7 +359,12 @@ func (f *playerchar) GetName() string {
 	return f.Name
 }
 func (e *enemy) reportdeath() {
-	fmt.Print(e.Deathcry)
+	fmt.Printf("\t%v dies and cries out: \"%v\"", e.Name, e.Deathcry)
+	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
+	fmt.Printf("\n\n\t%v is slain. %v XP awarded.", e.Name, e.worthxp)
+	time.Sleep(time.Millisecond * 2000)
+	p1.addxp(e.worthxp)
+
 }
 func (e *enemy) GetName() string {
 	return e.Name
@@ -398,9 +418,7 @@ func initplayer(player *playerchar) { //set initial player values
 
 }
 
-var compass = `N
-	               W-╬-E
-	                 S`
+var compass = []string{0: "N", 1: "W-╬-E", 2: "S"}
 
 func initworld() { //creates all maplocs and enemys
 	cellar1.area = "Cellar"
@@ -427,13 +445,13 @@ func initworld() { //creates all maplocs and enemys
 	cellar2.title = ` Main Cellar  `
 	cellar3.title = `Eastern Cellar`
 	cellar4.title = ` Sub-Basement `
-	cellar1.descrip = "You're standing in the western room of the cellar basement. Boxes and crates are stacked the area. Rats have eaten through the boxes. You're able to move eastward to the central basement."
+	cellar1.descrip = "You're standing in the western room of the cellar\nbasement. Boxes and crates are stacked the area. Rats have gnawed the\nboxes to bits. You're able to move eastward to the central basement.\n"
 
-	cellar2.descrip = "This area the cellar is a large underground area for storage and staging supplies. Water pipes and air ducts are leading in all directions. Darkness surrounds everything and you can hear the furnace. You can go East and go deeper into the basement or West towards the storage area of the basement. A separate path leads down into the sub-basement."
+	cellar2.descrip = "This area the cellar is a large underground area\nfor storage and staging supplies. Water pipes and\nair ducts are leading in all directions. Darkness\nsurrounds everything and you can hear the furnace.\nYou can go East and go deeper into the basement or\nWest towards the storage area of the basement. A\nseparate path leads down into the sub-basement.\n"
 
-	cellar3.descrip = "You're in the eastern part of the basement. This part of the basement is desecrated and has been decaying for decades. You can hear the furnace to the west. You can go west back towards the central area of the basement."
+	cellar3.descrip = "You're in the eastern part of the basement. This\npart of the basement is desecrated and has been\ndecaying for decades. You can hear the furnace to\nthe west. You can go west back towards the central\narea of the basement.\n"
 
-	cellar4.descrip = "The sub-basement is littered with rat corpses and piles of rat treasures and rotting detritus. The furnance is loud from above and keeps the rats warm in the winter. A ladder leads upward back to the Cellar."
+	cellar4.descrip = "The sub-basement is littered with rat corpses and\npiles of rat treasures and rotting detritus. The\nfurnance is loud from above and keeps the rats warm\nin the winter. A ladder leads back up to the Cellar.\n"
 
 	//ENEMY STRUCTS
 	rand.Seed(21)
@@ -544,29 +562,18 @@ func storyintro() {
 
 func drawplayerbar(player *playerchar) {
 	fmt.Print(ZEROHOME)
-	titlebar1 := strings.Repeat("═", 140)
+	titlebar1 := "\n░░░░░░░▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓█████▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒░░░░░░░"
 	color.Set(color.FgBlue)
-	fmt.Println(titlebar1)
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tCharacter:")
+	fmt.Print("PLAYER:")
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
 	fmt.Print(player.Name+"(lvl"+strconv.Itoa(int(player.Level))+")", "\t")
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 	fmt.Print("\tMax HP:")
 	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.CurrHealthMax, "\t")
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tWielding:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.Weapon, "(", player.Weapondmg, "dmg)", "\t")
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tLocation:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.Area, "\n")
-
-	//Draw bottom blue bar
+	fmt.Print(player.CurrHealthMax)
 	color.Set(color.FgBlue)
-	fmt.Println(titlebar1)
+	fmt.Print(titlebar1)
 
 }
 func drawplayertitleframe(player *playerchar) {
@@ -646,7 +653,9 @@ const ( //test comment
 	PLAYERINFOHOME      = "\033[11;0H"  //
 	NAVAREA             = "\033[09;16H" //
 	NAVLOC              = "\033[04;0H"
-	COMPASSDRAW         = "\033[4;26H" //
+	COMPASSDRAW1        = "\033[4;26H" //
+	COMPASSDRAW2        = "\033[5;24H" //
+	COMPASSDRAW3        = "\033[6;26H" //
 	NAVDESCRIP          = "\033[11;0H" //
 	NAVTRAVEL           = "\033[18;0H" //
 	ENEMIESLISTED       = "\033[19;0H" //
