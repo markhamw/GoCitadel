@@ -8,55 +8,57 @@ import (
 
 func drawskull() {
 	conred()
+	fmt.Println(HOME)
 	for _, text := range skull {
-		fmt.Println("\t\t\t\t", text)
+		fmt.Println(text)
 	}
 
+	fmt.Println(HOME)
 }
-func skullrefresh() {
-	for _, text := range skull {
-		fmt.Println("\t\t\t\t", text)
-	}
-}
-func skulldrawdown() {
+
+func skulldrawdown(x ...string) {
+
 	conred()
-	titlebar1 := strings.Repeat(`░`, len(titletext[1])/2) //Prints Red Bar below erase effect f
-	fmt.Println(HOME)                                     //Moves cursor to start of 11th line
+
+	fmt.Println(HOME) //Moves cursor to start of 11th line
 	fmt.Println(DELETETOENDOFLINE)
 	time.Sleep(time.Millisecond * ANIMATEDELAY)
+
 	pulldownanimation := func(x int) {
 		for count := 0; count < x; count++ {
-			fmt.Print("\033[1A") //move cursor up 1 line
+			fmt.Print("\033[3A") //move cursor up 1 line
 			fmt.Print("\033[K")  //Delete everything from the cursor to the end of the line.
+			conwhite()
 			fmt.Println(strings.Repeat(" ", 180))
-			fmt.Println(titlebar1) //Prints Red Bar below erase effect f
+			fmt.Printf(ratimage2[0] + "\n")
+			fmt.Printf(ratimage2[1] + "\n")
+			fmt.Printf(ratimage2[2] + "\n")
 			time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
 		}
 	}
 	pulldownanimation(30) //28 times/lines
 
 	fmt.Println(HOME)
+
 }
 func skullanimateeyesleft() {
-	clear()
-	drawtitle()
+
 	skull[8] = "    `9XXXXXXXXXXXP' `9XX'   \u001b[37;1m█-█\u001b[31;1m██   `98v8P'  █\u001b[37;1m█-█\u001b[31;1m██  `XXP' `9XXXXXXXXXXXP'"
-	skullrefresh()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	drawskull()
+	time.Sleep(time.Millisecond * 300)
 }
 func skullanimateeyesright() {
-	clear()
-	drawtitle()
+
 	skull[8] = "    `9XXXXXXXXXXXP' `9XX'   ██\u001b[37;1m█-█\u001b[31;1m   `98v8P'  ███\u001b[37;1m█-█\u001b[31;1m  `XXP' `9XXXXXXXXXXXP'"
-	skullrefresh()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	drawskull()
+	time.Sleep(time.Millisecond * 250)
 }
 func titleintro() {
 	clear()
-	//fmt.Println(HIDECURSOR)
-
 	drawtitle()
+	time.Sleep(time.Millisecond * 2000)
 	drawskull()
+	time.Sleep(time.Millisecond * 1000)
 	skullanimateeyesleft()
 	skullanimateeyesright()
 	skullanimateeyesleft()
@@ -66,65 +68,52 @@ func titleintro() {
 
 }
 func skullanimatefinale() {
-	clear()
-	drawtitle()
+
 	skull[16] = "                              XXXX X.`▓'.X XXXX"
 	skull[17] = "                              XP^X'`▓   ▓'`X^XX"
 	skull[18] = "                              X. ▓  `   '  ▓ )X"
 	skull[19] = "                              `▓  `       '  ▓'"
 	skull[20] = "                                `             '"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.`\u001b[33;1m█\u001b[31;1m'.X XXXX"
 	skull[17] = "                              XP^X'`▓ ▓ ▓'`X^XX"
 	skull[18] = "                              X. ▓  `   '  ▓ )X"
 	skull[19] = "                              `▓  `       '  ▓'"
 	skull[20] = "                                `             '"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
-	skull[8] = "    `9XXXXXXXXXXXP' `9XX'   █\u001b[37;1m█-█\u001b[31;1m█   `98v8P'  █\u001b[37;1m█-█\u001b[31;1m█  `XXP' `9XXXXXXXXXXXP'"
+	skull[8] = "    `9XXXXXXXXXXXP' `9XX'   █\u001b[37;1m█-█\u001b[31;1m█   `98v8P'  █\u001b[37;1m█-█\u001b[31;1m█   `XXP' `9XXXXXXXXXXXP'"
 	skull[16] = "                              XXXX X.` '.X XXXX"
 	skull[17] = "                              XP^X'`\u001b[33;1m▓▓▓▓▓\u001b[31;1m'`X^XX"
 	skull[18] = "                              X.\u001b[33;1m█▓▓▓\u001b[31;1m▓ ▓ ▓\u001b[33;1m▓▓▓█\u001b[31;1m)X"
 	skull[19] = "                              `▓ ▓` `   '  '▓ ▓'"
 	skull[20] = "                                `             '"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█▓▓▓█\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m███▓█████▓███\u001b[31;1m)X"
 	skull[19] = "                              `▓ ▓`▓`▓ ▓'▓▓'▓ ▓'"
 	skull[20] = "                                `             '"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██▓▓█████▓▓█\u001b[31;1m)X"
 	skull[19] = "                              `▓ ▓`\u001b[33;1m▓█████▓\u001b[31;1m'▓ ▓'"
 	skull[20] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[21] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
 	skull[19] = "                              `▓ ▓\u001b[33;1m█  ███  █\u001b[31;1m'▓ ▓'"
 	skull[20] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[21] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -132,10 +121,8 @@ func skullanimatefinale() {
 	skull[20] = "                              `▓ ▓\u001b[33;1m██ ███ ██\u001b[31;1m'▓ ▓'"
 	skull[21] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[22] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -145,11 +132,9 @@ func skullanimatefinale() {
 	skull[22] = "                              `▓ ▓\u001b[33;1m██ ███ ██\u001b[31;1m'▓ ▓'"
 	skull[23] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[24] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
-	skull[8] = "    `9XXXXXXXXXXXP' `9XX'  █\u001b[37;1m██-██\u001b[31;1m█  `98v8P' █\u001b[37;1m██-██\u001b[31;1m█ `XXP' `9XXXXXXXXXXXP'"
+	skull[8] = "    `9XXXXXXXXXXXP' `9XX'  █\u001b[37;1m██-██\u001b[31;1m█  `98v8P' █\u001b[37;1m██-██\u001b[31;1m█  `XXP' `9XXXXXXXXXXXP'"
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -159,11 +144,8 @@ func skullanimatefinale() {
 	skull[22] = "                              `▓ ▓\u001b[33;1m██ ███ ██\u001b[31;1m'▓ ▓'"
 	skull[23] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[24] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
-	clear()
-	drawtitle()
-	skull[8] = "    `9XXXXXXXXXXXP' `9XX'  █\u001b[37;1m██-██\u001b[31;1m█  `98v8P' █\u001b[37;1m██-██\u001b[31;1m█ `XXP' `9XXXXXXXXXXXP'"
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -174,7 +156,7 @@ func skullanimatefinale() {
 	skull[23] = "                                XX`▓ \u001b[33;1m███\u001b[31;1m ▓`XX'"
 	skull[24] = "                                  XX▓`▓`▓X"
 	skull[25] = "                                  XX XX XX"
-	skullrefresh()
+	drawskull()
 
 	time.Sleep(time.Millisecond * ANIMATEDELAY)
 }
@@ -188,7 +170,7 @@ var skull = [26]string{
 	5:  "9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP",
 	6:  " 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP",
 	7:  "  `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP'",
-	8:  "    `9XXXXXXXXXXXP' `9XX'   ██\u001b[37;1m█-█\u001b[31;1m   `98v8P'  ███\u001b[37;1m█-█\u001b[31;1m `XXP' `9XXXXXXXXXXXP'",
+	8:  "    `9XXXXXXXXXXXP' `9XX'   ██\u001b[37;1m█-█\u001b[31;1m   `98v8P'  ███\u001b[37;1m█-█\u001b[31;1m  `XXP' `9XXXXXXXXXXXP'",
 	9:  "        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~",
 	10: "                        )b.  .dbo.dP'`v'`9b.odb.  .dX(",
 	11: "                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.",
@@ -249,25 +231,24 @@ var castle = `
  ||_|_|_|_|_|_|_|___|___|___|___||_|_|_|_|_|____|___|___|____|___|__|__|__|`
 
 var castletext = []string{
-	0: "\nYou're a mercenary adventurer...living in the castle...working for the Emperor, and apprentice to Master Gurlows.\n",
-	1: "Your assignment is to clear any rats from the cellar & you are approaching the cellar now. Rumors dictate a king rat holds the sub-basement.\n",
-	2: "The fack'n vermin are causing trouble with kitchen staff, again. Master Gurlows expects raticide. \n",
-	3: "You ready your weapon and prepare to enter the Cellar.\nPRESS ANY KEY TO CONTINUE",
+	0: "You're a mercenary adventurer...living in the castle...working for the Emperor,\n",
+	1: "and apprentice to Master Gurlows. Your commission is to neutralize feral finks in the\n",
+	2: "cellar & you're approaching the cellar now. Rumors dictate a king rat holds the\n",
+	3: "sub-basement. Aggressive ones are causing trouble with kitchen staff. Master Gurlows\n",
+	4: "expects raticide. You arrive at the Cellar, weapon ready, hungover and in a hurry.\n",
+	5: "                      ▒▓▌PRESS ANY KEY TO CONTINUE▐▓▒",
 }
 
 var storyintrotext1 = []string{
-	0: "\tSlowly..you regain consciousness.\n\n",
-	1: "\t............\n\n",
-	2: "\tYou're waking up in your meager rented quarters in Castle Iota within the Citadel walls.\n",
-	3: "\n",
-	4: "\tLast nights celebration has left you weak and hungover! You warily climb to your feet.\n",
-	5: "\n",
-	6: "\tYou drank too much, again. As you begin to stand on two feet you have trouble remembering your own name.\n",
-	7: "\n",
-	8: "\tWhat is it again?...\n\n",
-	9: "\tEnter your name: ",
+	0: "Slowly.....you begin to regain consciousness.........",
+	1: "Visions of the Beast fade away as your nightmare subsides....",
+	2: "You're waking up in rented quarters in the Citadel.",
+	3: "Last nights' Rattus Feast left you weak, and hungover! You struggle to your feet.",
+	4: "You drank too much, again - can't recall your own name.",
+	5: "What is it again!?...",
 }
-var titletext = []string{
+
+/* var titletext = []string{
 	0:  ` ▄████████  ▄█      ███        ▄████████ ████████▄     ▄████████  ▄█                ███      ▄██████▄   ▄█     █▄     ▄████████    ▄████████ `,
 	1:  ` ███    ███ ███  ▀█████████▄   ███    ███ ███   ▀███   ███    ███ ███            ▀█████████▄ ███    ███ ███     ███   ███    ███   ███    ███ `,
 	2:  ` ███    █▀  ███▌    ▀███▀▀██   ███ ▄  ███ ███    ███   ███    █▀  ███        ██     ▀███▀▀██ ███  ▄ ███ ███     ███   ███    █▀    ███  ▄ ███ `,
@@ -279,4 +260,17 @@ var titletext = []string{
 	8:  ` ████████              ▄                                           ▀                                                                ███    ███ `,
 	9:  ` ██████`,
 	10: `░░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░░░░░░░░░░░`,
+} */
+var titletext2 = []string{
+	0:  ` ▄████████  ▄█      ███        ▄████████ ████████▄     ▄████████  ▄█`,
+	1:  ` ███    ███ ███  ▀█████████▄   ███    ███ ███   ▀███   ███    ███ ███`,
+	2:  ` ███    █▀  ███▌    ▀███▀▀██   ███ ▄  ███ ███    ███   ███    █▀  ███`,
+	3:  ` ███        ███▌     ███   ▀   ███    ███ ███    ███  ▄███▄▄▄     ███`,
+	4:  ` ███░░░░░░░░████░░░░░███░░░░░████████████░███░░░░███░█████▀▀▀░░░░░███`,
+	5:  ` ███    █▄  ███      ███       ███    ███ ███    ███   ███    █▄  ███`,
+	6:  ` ███    ███ ███      ███       ███    ███ ███   ▄███   ███    ███ ███▌    ▄`,
+	7:  ` ███    █▀  █▀      ▄████▀     ███    █▀  ████████▀    ██████████ █████▄▄██`,
+	8:  ` ████████              ▄                                           ▀       `,
+	9:  ` ██████`,
+	10: `░░░░░░░▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓█████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░`,
 }

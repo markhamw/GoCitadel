@@ -116,15 +116,27 @@ func (f *playerchar) brpds(e *enemy) {
 } //battle report details string
 
 func (f *playerchar) brmiss(e *enemy) { //battle report MISS
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Printf("\n%v«%v» %v %v\n", entprompt(f), f.GetHealth(), f.miss(), e.GetName())
-	time.Sleep(time.Millisecond * 2000)
+
+	both := (e.isalive() && f.isalive())
+	pl1 := !(f.isalive())
+	en1 := !(e.isalive())
+
+	if both {
+		color.Set(color.FgGreen, color.Bold, color.BgBlack)
+		fmt.Printf("\n%v«%v» %v %v\n", entprompt(f), f.GetHealth(), f.miss(), e.GetName())
+		time.Sleep(time.Millisecond * 2000)
+	} else if pl1 {
+		playerdeath()
+	} else if en1 {
+		e.reportdeath(f)
+	}
 }
 
 func (e *enemy) enemybrpds(p *playerchar) {
 	conwhite()
 
-	if e.isalive() && p.isalive() {
+	if (e.isalive() && p.isalive()) == true {
+
 		x := e.getdamageroll()
 		p.Updatehp(p.Health - x)
 		fmt.Printf("\n%v«%v» %v %v for %v\n", entprompt(e), e.GetHealth(), e.attackstring(), p.GetName(), strconv.Itoa(x))
@@ -267,9 +279,17 @@ func navigator(player *playerchar) {
 
 }
 func (e *enemy) enemybrpdsmiss(p *playerchar) {
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Printf("\n%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.miss(), p.GetName())
-	time.Sleep(time.Millisecond * 2000)
+	if (e.isalive() && p.isalive()) == true {
+
+		color.Set(color.FgWhite, color.Bold, color.BgBlack)
+		fmt.Printf("\n%v«%v» %v %v\n", entprompt(e), e.GetHealth(), e.miss(), p.GetName())
+		time.Sleep(time.Millisecond * 2000)
+
+	} else if p.isalive() == false {
+		playerdeath()
+	} else if e.isalive() == false {
+		e.reportdeath(p)
+	}
 }
 
 func battreport(p *playerchar, en *enemy) {
@@ -311,8 +331,9 @@ func checkbattle(player *playerchar, mob *enemy) {
 		fmt.Printf("\n%v the %v is here.\n", mob.Name, mob.Typeofen)
 	}
 
-	time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 100)
 }
+
 func (f *playerchar) miss() string {
 	x := []string{
 		0: "misses",
@@ -350,24 +371,22 @@ func (f *playerchar) attack(mob *enemy) {
 	fmt.Println(ZEROHOME)
 	drawplayerbar(f)
 	for mob.Health > 0 {
-		if f.isalive() == false {
-			playerdeath()
-		} else {
-			battreport(f, mob)
-		}
-		f.addxp(mob.getxpworth())
-		f.kills++
-	}
 
+		battreport(f, mob)
+
+	}
+	fmt.Println(".")
 }
 
 func generatemaplocdata(loc *maploc, p *playerchar) {
 	loc.printmap()
 	fmt.Print(NAVTRAVEL)
+
 	color.Set(color.FgYellow, color.Bold, color.BgBlack)
-	fmt.Print("Use n,s,e,w   u(up),d(down)  b=battle i=check iventory\nq=char info l=look")
+	fmt.Print("Use n,s,e,w ░ u(up),d(down) ░ b=battle ░\ni=check iventory ░ q=char info ░ l=look")
 	p.checklvl()
 }
+
 func (l *maploc) printmap() {
 	fmt.Print(NAVLOC)
 	conred()
@@ -427,18 +446,34 @@ func (f *playerchar) battleinit() {
 	}
 }
 
+var lvl1 = true
+var lvl2 = true
+
 func (f *playerchar) checklvl() {
 	if f.totxp == 1200 {
-		f.levup()
-	} else if f.totxp == 3000 {
-		f.levup()
-	} else {
-		return
+
+		if lvl1 {
+
+			f.levup()
+			lvl1 = false
+		} else if !lvl1 {
+			return
+		}
+
+	}
+	if f.totxp == 3000 {
+		if lvl2 {
+			f.levup()
+			lvl2 = false
+		}
+
 	}
 
 }
+
 func (f *playerchar) addxp(xp int) {
 	(*f).totxp += xp
+	(*f).kills++
 }
 
 func (f *playerchar) levup() {
@@ -450,7 +485,7 @@ func (f *playerchar) levup() {
 	f.SetHealth()
 	f.Updatehp(f.CurrHealthMax)
 	conblue()
-	fmt.Printf("%v gained a Level!!!\n", strings.ToUpper(f.Name))
+	fmt.Printf("\n%v gained a Level!!!\n", strings.ToUpper(f.Name))
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 	fmt.Printf("Str +1\nCon +1\nAtk+1\nInt+1\n")
 	fmt.Printf("New XP total: %v\n", f.gettotalxp())
@@ -497,7 +532,6 @@ func (e *enemy) reportdeath(p *playerchar) {
 	fmt.Printf("\n\n%v is slain. %v XP awarded.", e.Name, e.worthxp)
 	time.Sleep(time.Millisecond * 2000)
 	p.addxp(e.getxpworth())
-	p.kills++
 	time.Sleep(time.Millisecond * 500)
 	p.checklvl()
 }
@@ -520,39 +554,48 @@ func playerdeath() {
 	os.Exit(0)
 }
 func initplayername(player *playerchar) string {
-
-	fmt.Print("\033[25;27H")
-	fmt.Print(SAVECURSOR)
 	var playername string
-	fmt.Scan(&playername)
-	fmt.Print(RETURNTOSAVEDCURSOR)
-	fmt.Printf("Use %v? (PRESS ANY KEY TO CONTINUE, or n to try again)", playername)
-	answer, _, err := keyboard.GetSingleKey()
-	if err != nil {
-		panic(err)
+	name := func() rune {
+		fmt.Print(HOME)
+		fmt.Println(DELETETOENDOFLINE)
+		fmt.Println(DELETETOENDOFLINE)
+		fmt.Print(HOME)
+		fmt.Print("Remember your first name (type it, press enter):")
+		fmt.Print(SAVECURSOR)
+		fmt.Scan(&playername)
+		fmt.Print(RETURNTOSAVEDCURSOR)
+		fmt.Printf("\nUse %v? (PRESS ANY KEY TO CONTINUE, or n to try again)", playername)
+		answer, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			panic(err)
+		}
+		return answer
 	}
-	answerstring := string(answer)
+
+	answerstring := string(name())
 
 	switch answerstring {
 
 	case "n", "N":
-		fmt.Print("\033[25;27H")
-		fmt.Print(DELETETOENDOFLINE) //repos cursor to after yn
-		fmt.Print("\033[25;27H")
-		fmt.Scan(&playername)
-	case "y", "Y":
-		return playername
+		name()
 	default:
 		return playername
 	}
 
 	return playername
 }
+
 func tutintro(player *playerchar) {
-	drawplayertitleframe(player)
+	defer getcharpause()
+	clear()
+	drawplayerbar(player)
+	conwhite()
 	fmt.Println(castle)
+	conwhite()
 	readblock(castletext)
+
 }
+
 func initplayer(player *playerchar) { //set initial player values
 	player.Weapon, player.Weapondmg = "Flail", 2
 	player.Str, player.Dex, player.Int, player.Con, player.Level, player.Atk = 10, 10, 10, 10, 1, 2
@@ -589,12 +632,9 @@ func initworld() { //creates all maplocs and enemys
 	cellar2.title = ` Main Cellar  `
 	cellar3.title = `Eastern Cellar`
 	cellar4.title = ` Sub-Basement `
-	cellar1.descrip = "You're standing in the western room of the cellar\nbasement. Boxes and crates are stacked the area.\nRats have gnawed the boxes to bits. You're able\nto move eastward to the central basement.\n"
-
-	cellar2.descrip = "This area the cellar is a large underground area\nfor storage and staging supplies. Water pipes and\nair ducts are leading in all directions. Darkness\nsurrounds everything and you can hear the furnace.\nYou can go East and go deeper into the basement or\nWest towards the storage area of the basement. A\nseparate path leads down into the sub-basement.\n"
-
-	cellar3.descrip = "You're in the eastern part of the basement. This\npart of the basement is desecrated and has been\ndecaying for decades. You can hear the furnace to\nthe west. You can go west back towards the central\narea of the basement.\n"
-
+	cellar1.descrip = "You're standing in the western part of the cellar\nbasement. Boxes and crates are stacked in the area.\nRats have gnawed the boxes to bits. You're able\nto move eastward to the central basement. \n"
+	cellar2.descrip = "This large area of the cellar is for staging and\nstorage of supplies. Water aqueducts crowd the ceiling\nand air ducts are leading in all directions. Darkness\nclings to everything and you can hear the furnace.\nYou can go East and go deeper into the basement or\nWest towards the storage area of the basement. A\nseparate path leads down into the sub-basement.\n"
+	cellar3.descrip = "The eastern area of the basement. This part of the\nbasement should be condemned.  It has been\ndecaying for decades. You can hear the furnace to\nthe west. You can go west back towards the central\narea of the basement. It smells like a Rattus nest.\n"
 	cellar4.descrip = "The sub-basement is littered with rat corpses and\npiles of rat treasures and rotting detritus. The\nfurnance is loud from above and keeps the rats warm\nin the winter. A ladder leads back up to the Cellar.\n"
 
 	//ENEMY STRUCTS
@@ -618,10 +658,10 @@ func initworld() { //creates all maplocs and enemys
 	rat2.Battlecry = "ReeeEEEEEttt!!"
 	rat3.Battlecry = "KreeeEEEEssstttt!!"
 	bossrat.Battlecry = "KiKreeeEEEEss Eeeep!!"
-	rat1.Deathcry = "Eeeeeeeeeppppppsss!!"
-	rat2.Deathcry = "krEeeeeeeeeppppppsss!!"
-	rat3.Deathcry = "crEeeeeeeeettt!!"
-	bossrat.Deathcry = "crEeeeeeeeettt!!"
+	rat1.Deathcry = "Eeeeeeeeeppppppsss!! hgffff!"
+	rat2.Deathcry = "krEeeeeeeeeppppppsss!! eeeeeaapp!!"
+	rat3.Deathcry = "crEeeeeeeeettt!! shhhttttt! shtt!"
+	bossrat.Deathcry = "AAAGGGGGGGGhhhhhhhhcrEeeeeeeeettt!! SSSSSttttt!!!!!!!! *gurgle*"
 	rat1.Health, rat2.Health, rat3.Health, bossrat.Health = 12, 11, 14, 19
 	rat1.CurrHealthMax, rat2.CurrHealthMax, rat3.CurrHealthMax, bossrat.CurrHealthMax = 12, 11, 14, 19
 	cellar1.mobs = []*enemy{rat1}
@@ -649,6 +689,7 @@ func (e *enemy) Ratnamegen() {
 		2: "Do",
 		3: "Ka",
 		4: "Ret",
+		5: "El",
 	}
 	ratnames2 := []string{
 		0: "jaki",
@@ -656,14 +697,15 @@ func (e *enemy) Ratnamegen() {
 		2: "tikt",
 		3: "jhilz",
 		4: "kansta",
+		5: "fildo",
 	}
 
-	(*e).Name = ratnames1[random(0, 5)] + ratnames2[random(0, 5)]
+	(*e).Name = ratnames1[random(0, 6)] + ratnames2[random(0, 6)]
 }
 
 func drawtitle() {
 	color.Set(color.FgBlue)
-	for _, text := range titletext {
+	for _, text := range titletext2 {
 		fmt.Println(text)
 	}
 	//titlebar1 := strings.Repeat("═", 140)
@@ -682,24 +724,20 @@ func readblock(t []string) {
 	}
 
 }
+
 func storyintro() {
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-
-	//inline func to pause random 170ms
-	randtime := func() time.Duration {
-		rand.Seed(time.Now().UTC().UnixNano())
-		//sets type for proper return value
-		randms := time.Duration(rand.Intn(10))
-		return randms
-	}
 	for key := range storyintrotext1 {
-
+		fmt.Print("▐▓")
 		for _, text := range storyintrotext1[key] {
-
 			fmt.Print(string(text))
-			time.Sleep(time.Millisecond * randtime())
+			time.Sleep(time.Millisecond * 10)
 		}
-
+		fmt.Print("▓▌")
+		time.Sleep(time.Millisecond * 1410)
+		fmt.Println(HOME)
+		fmt.Print(DELETETOENDOFLINE)
+		fmt.Println(HOME)
 	}
 
 }
@@ -720,8 +758,9 @@ func drawplayerbar(player *playerchar) {
 	fmt.Print(titlebar1)
 
 }
-func drawplayertitleframe(player *playerchar) {
-	skulldrawdown()
+
+/* func drawplayertitleframe(player *playerchar) {
+
 	titlebar1 := strings.Repeat("═", 140)
 	fmt.Print(PLAYERINFOHOME) //removed Println
 	fmt.Print(DELETETOENDOFLINE)
@@ -749,7 +788,7 @@ func drawplayertitleframe(player *playerchar) {
 	fmt.Println(titlebar1)
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 
-}
+} */
 func yn() string {
 	char, _, err := keyboard.GetSingleKey()
 	if err != nil {
@@ -785,8 +824,7 @@ func random(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-const ( //test comment
-
+const (
 	ANIMATEDELAY      = 100           //as
 	ANIMATEDELAYSMALL = 50            //
 	MINHEALTH         = 0             //
@@ -801,7 +839,7 @@ const ( //test comment
 	COMPASSDRAW2      = "\033[5;24H" //
 	COMPASSDRAW3      = "\033[6;26H" //
 	NAVDESCRIP        = "\033[11;0H" //
-	NAVTRAVEL         = "\033[18;0H" //
+	NAVTRAVEL         = "\033[24;0H" //
 	ENEMIESLISTED     = "\033[19;0H" //
 	HEALTHBAR         = "\033[4;40H" //
 	HEALTHBARFILL     = "\033[4;41H" //
@@ -825,6 +863,10 @@ func conred() {
 func conwhite() {
 	color.Set(color.FgWhite, color.Bold, color.BgBlack)
 }
+func conmagenta() {
+	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
+}
+
 func conblue() {
 	color.Set(color.FgBlue, color.Bold, color.BgBlack)
 }

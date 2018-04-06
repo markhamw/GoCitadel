@@ -58,11 +58,12 @@ func main() {
 	initplayer(P1)                 //set initial player values
 	P1.SetName(initplayername(P1)) //set name and confirm choice
 	P1.SetHealth()
-	getcharpause() //PAUSE
 	tutintro(P1)
 	navigator(P1) //??? calls drawplayerbar and generates room data
 
 	//xp doesnt tally
 	//level up text stays on screen
 	//keep play-testing
+	//eye animations bug when running in cmd download and run .exe
+
 }
