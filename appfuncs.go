@@ -33,6 +33,53 @@ func (f *playerchar) getdamageroll() int {
 func (e *enemy) getdamageroll() int {
 	return e.Atk + int(drawrand4())
 }
+func (f *playerchar) lookmap(loc *maploc) string {
+	return loc.lookdescrip
+}
+func (f *playerchar) lookroom(x uint8) {
+	clear()
+	drawplayerbar(f)
+	fmt.Printf("\n\nYou look around and search the area...\n\n")
+	switch x {
+	case 1:
+		f.lookenemy(rat1)
+		congreen()
+		fmt.Println(f.lookmap(cellar1))
+	case 2:
+		f.lookenemy(rat2)
+		congreen()
+		fmt.Println(f.lookmap(cellar2))
+	case 3:
+		f.lookenemy(rat3)
+		congreen()
+		fmt.Println(f.lookmap(cellar3))
+	case 4:
+		f.lookenemy(bossrat)
+		congreen()
+		fmt.Println(f.lookmap(cellar4))
+	}
+	conwhite()
+	fmt.Println("▒▓▌PRESS ANY KEY TO CONTINUE▐▓▒")
+	getcharpause()
+}
+
+func (f *playerchar) lookenemy(e *enemy) {
+	x := e.isalive()
+	if x {
+		conmagenta()
+		fmt.Printf("%v is here.\n\n\n", e.Name)
+		for _, x := range e.img {
+
+			fmt.Println(x)
+		}
+		fmt.Print("\n\n")
+	} else if !x {
+		conwhite()
+		fmt.Printf("\n\nThe remains of %v are scattered. %v's corpse is resting here.\n\n", e.Name, e.Name)
+		fmt.Print("")
+	}
+
+}
 
 func (f *playerchar) hitroll(max int) bool {
 	var results bool
@@ -115,19 +162,19 @@ func (f *playerchar) brpds(e *enemy) {
 
 } //battle report details string
 
-func (f *playerchar) brmiss(e *enemy) { //battle report MISS
+func (f *playerchar) brmiss(e *enemy) {
 
 	both := (e.isalive() && f.isalive())
-	pl1 := !(f.isalive())
-	en1 := !(e.isalive())
+	pl1dead := !(f.isalive())
+	en1dead := !(e.isalive())
 
 	if both {
 		color.Set(color.FgGreen, color.Bold, color.BgBlack)
 		fmt.Printf("\n%v«%v» %v %v\n", entprompt(f), f.GetHealth(), f.miss(), e.GetName())
 		time.Sleep(time.Millisecond * 2000)
-	} else if pl1 {
+	} else if pl1dead {
 		playerdeath()
-	} else if en1 {
+	} else if en1dead {
 		e.reportdeath(f)
 	}
 }
@@ -239,6 +286,9 @@ func checkmove(player *playerchar, exits []int) {
 		player.battleinit()
 	case 'q':
 		player.printstats()
+	case 'l':
+		player.lookroom(player.location)
+
 	}
 	time.Sleep(time.Millisecond * 400)
 	navigator(player)
@@ -293,6 +343,10 @@ func (e *enemy) enemybrpdsmiss(p *playerchar) {
 }
 
 func battreport(p *playerchar, en *enemy) {
+	conwhite()
+	fmt.Printf("\n%v engages in combat with %v\n\n", p.Name, en.Name)
+	conred()
+	fmt.Printf("%v charges into battle screaming \"%v\"\n\n", en.Name, en.Battlecry)
 	for en.Health > 0 {
 		if p.hitroll(10) {
 			p.brpds(en)
@@ -400,6 +454,7 @@ func (l *maploc) printmap() {
 	l.printdescrip()
 	printcompass()
 }
+
 func (f *playerchar) getmaploc() string {
 	var x string
 	switch f.location {
@@ -526,7 +581,7 @@ func (f *playerchar) GetName() string {
 	return f.Name
 }
 func (e *enemy) reportdeath(p *playerchar) {
-
+	conred()
 	fmt.Printf("%v dies and cries out: \"%v\"", e.Name, e.Deathcry)
 	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
 	fmt.Printf("\n\n%v is slain. %v XP awarded.", e.Name, e.worthxp)
@@ -637,6 +692,11 @@ func initworld() { //creates all maplocs and enemys
 	cellar3.descrip = "The eastern area of the basement. This part of the\nbasement should be condemned.  It has been\ndecaying for decades. You can hear the furnace to\nthe west. You can go west back towards the central\narea of the basement. It smells like a Rattus nest.\n"
 	cellar4.descrip = "The sub-basement is littered with rat corpses and\npiles of rat treasures and rotting detritus. The\nfurnance is loud from above and keeps the rats warm\nin the winter. A ladder leads back up to the Cellar.\n"
 
+	cellar1.lookdescrip = "Vermin have clearly attempted to re-purpose\nthis area as their own. Useless containers line the\nwalls and a few have bite marks. Important containers\nare encased in Elder Wax for safe storage.\n"
+	cellar2.lookdescrip = "Fire light is escaping from furnace vents.\nThe room is large and the ceiling is lost to darkness.\nThe sub-basement is open and is usually kept closed.\nYou recall that the sub-basement might be dangerous."
+	cellar3.lookdescrip = "Cellar walls are crumbling and masons have\ntried to repair the failing infrastructure. It appears\nvermin have piled bits of bone and food in this part\nof the cellar."
+	cellar4.lookdescrip = "The sub-basement is a stately room for rulers\nof rats and vermin.  A RUS-sized hole leads to the other\npathways that are too small to fit through. Bits\nof hair and bone and rotting rat treasures are present."
+
 	//ENEMY STRUCTS
 	rand.Seed(21)
 	time.Sleep(time.Millisecond * 300)
@@ -664,6 +724,10 @@ func initworld() { //creates all maplocs and enemys
 	bossrat.Deathcry = "AAAGGGGGGGGhhhhhhhhcrEeeeeeeeettt!! SSSSSttttt!!!!!!!! *gurgle*"
 	rat1.Health, rat2.Health, rat3.Health, bossrat.Health = 12, 11, 14, 19
 	rat1.CurrHealthMax, rat2.CurrHealthMax, rat3.CurrHealthMax, bossrat.CurrHealthMax = 12, 11, 14, 19
+	rat1.img = ratimage1
+	rat2.img = ratimage2
+	rat3.img = ratimage3
+	bossrat.img = ratimage4
 	cellar1.mobs = []*enemy{rat1}
 	cellar2.mobs = []*enemy{rat2}
 	cellar3.mobs = []*enemy{rat3}
@@ -690,6 +754,8 @@ func (e *enemy) Ratnamegen() {
 		3: "Ka",
 		4: "Ret",
 		5: "El",
+		6: "Ra",
+		7: "Rump",
 	}
 	ratnames2 := []string{
 		0: "jaki",
@@ -698,9 +764,11 @@ func (e *enemy) Ratnamegen() {
 		3: "jhilz",
 		4: "kansta",
 		5: "fildo",
+		6: "bhendu",
+		7: "nado",
 	}
 
-	(*e).Name = ratnames1[random(0, 6)] + ratnames2[random(0, 6)]
+	(*e).Name = ratnames1[random(0, 7)] + ratnames2[random(0, 7)]
 }
 
 func drawtitle() {
@@ -758,37 +826,6 @@ func drawplayerbar(player *playerchar) {
 	fmt.Print(titlebar1)
 
 }
-
-/* func drawplayertitleframe(player *playerchar) {
-
-	titlebar1 := strings.Repeat("═", 140)
-	fmt.Print(PLAYERINFOHOME) //removed Println
-	fmt.Print(DELETETOENDOFLINE)
-	//color.Set(color.FgBlue)
-	//fmt.Println(titlebar1)
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tCharacter:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.Name+"(lvl"+strconv.Itoa(int(player.Level))+")", "\t")
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tMax HP:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.CurrHealthMax, "\t")
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tWielding:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.Weapon, "(", player.Weapondmg, "dmg)", "\t")
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	fmt.Print("\tLocation:")
-	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	fmt.Print(player.Area, "\n")
-
-	//Draw bottom blue bar
-	color.Set(color.FgBlue)
-	fmt.Println(titlebar1)
-	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-
-} */
 func yn() string {
 	char, _, err := keyboard.GetSingleKey()
 	if err != nil {
@@ -867,6 +904,9 @@ func conmagenta() {
 	color.Set(color.FgMagenta, color.Bold, color.BgBlack)
 }
 
+func congreen() {
+	color.Set(color.FgGreen, color.Bold, color.BgBlack)
+}
 func conblue() {
 	color.Set(color.FgBlue, color.Bold, color.BgBlack)
 }

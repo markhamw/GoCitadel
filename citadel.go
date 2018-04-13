@@ -36,23 +36,25 @@ type enemy struct {
 	Health        int
 	CurrHealthMax int
 	worthxp       int
+	img           []string
 }
 
 type maploc struct {
-	roomid  uint8 //foreign key for playerchar mapping
-	grid    string
-	area    string
-	descrip string
-	title   string
-	mobs    []*enemy
-	exits   []int // value of -1 = cant go , predefined list of end point rooms for each room, adjacency map. eg -1,-1,3,1,-1,-1
+	roomid      uint8 //foreign key for playerchar mapping
+	grid        string
+	area        string
+	descrip     string
+	lookdescrip string
+	title       string
+	mobs        []*enemy
+	exits       []int // value of -1 = cant go , predefined list of end point rooms for each room, adjacency map. eg -1,-1,3,1,-1,-1
 }
 
 var P1 playerchar
 
 func main() {
-	titleintro()
-	storyintro()
+	//titleintro()
+	//storyintro()
 	P1 := new(playerchar)          //creates player struct
 	initworld()                    //sets up Enemies and maplocs
 	initplayer(P1)                 //set initial player values
@@ -60,10 +62,5 @@ func main() {
 	P1.SetHealth()
 	tutintro(P1)
 	navigator(P1) //??? calls drawplayerbar and generates room data
-
-	//xp doesnt tally
-	//level up text stays on screen
-	//keep play-testing
-	//eye animations bug when running in cmd download and run .exe
 
 }

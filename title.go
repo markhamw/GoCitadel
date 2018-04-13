@@ -185,13 +185,13 @@ var skull = [26]string{
 	20: "                                `             '",
 }
 
-var ratimage1 = []string{
+var ratimage4 = []string{
 	0: ",,==.",
-	1: "//    `",
+	1: "//   `",
 	2: "||      ,--~~~~-._ _(\\--,_",
-	3: "\\._,-~   \\      '    *  `o'",
+	3: "\\\\._,-~/  \\      '     *  `o'",
 	4: " `---~\\( _/,___( /_/`---~~/",
-	5: "	   ``==-    `==-,",
+	5: "       ``==-    `==-,",
 }
 var ratimage2 = []string{
 	0: "         ____()()",
@@ -202,9 +202,18 @@ var ratimage3 = []string{
 	0: "(q\\_/p)",
 	1: " /. .\\.-\"\"\"\"-.      ___",
 	2: "=\\_t_/=    /  `\\   (",
-	3: " )\\ ))__ _\\    |___)",
-	4: "nn-nn`  `nn---'",
+	3: "  )\\ ))__ _\\    |___)",
+	4: " nn-nn`  `nn---'",
 }
+var ratimage1 = []string{
+	0: "(\\,;,/)",
+	1: " (o o)\\//,",
+	2: "  \\ /     \\,",
+	3: "  `+'(  (   \\   )",
+	4: "     //  \\  |_./",
+	5: "   '~' '~----'",
+}
+
 var castle = `
                        _    __    __    __    __    _                          
                       | |__|__|__|__|__|__|__|__|__|_|                         
@@ -241,11 +250,12 @@ var castletext = []string{
 
 var storyintrotext1 = []string{
 	0: "Slowly.....you begin to regain consciousness.........",
-	1: "Visions of the Beast fade away as your nightmare subsides....",
-	2: "You're waking up in rented quarters in the Citadel.",
-	3: "Last nights' Rattus Feast left you weak, and hungover! You struggle to your feet.",
-	4: "You drank too much, again - can't recall your own name.",
-	5: "What is it again!?...",
+	1: "As your nightmare subsides, your visions of the Beast fade....",
+	2: "You wake up in rented quarters inside the Citadel.",
+	3: ".................",
+	4: "You struggle to your feet.",
+	5: "Indulgence is not unknown to adventurers. You're too hungover to remember your name.",
+	6: "What is it again!?...",
 }
 
 /* var titletext = []string{
