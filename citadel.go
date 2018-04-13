@@ -53,8 +53,8 @@ type maploc struct {
 var P1 playerchar
 
 func main() {
-	//titleintro()
-	//storyintro()
+	titleintro()
+	storyintro()
 	P1 := new(playerchar)          //creates player struct
 	initworld()                    //sets up Enemies and maplocs
 	initplayer(P1)                 //set initial player values
