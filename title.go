@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -12,7 +11,6 @@ func drawskull() {
 	for _, text := range skull {
 		fmt.Println(text)
 	}
-
 	fmt.Println(HOME)
 }
 
@@ -22,18 +20,17 @@ func skulldrawdown(x ...string) {
 
 	fmt.Println(HOME) //Moves cursor to start of 11th line
 	fmt.Println(DELETETOENDOFLINE)
-	time.Sleep(time.Millisecond * ANIMATEDELAY)
+	time.Sleep(time.Millisecond * animateddelay)
 
 	pulldownanimation := func(x int) {
+		conwhite()
 		for count := 0; count < x; count++ {
-			fmt.Print("\033[3A") //move cursor up 1 line
-			fmt.Print("\033[K")  //Delete everything from the cursor to the end of the line.
-			conwhite()
-			fmt.Println(strings.Repeat(" ", 180))
+			fmt.Print(MOVECURSORUPONE)
+			fmt.Println(DELETETOENDOFLINE)
 			fmt.Printf(ratimage2[0] + "\n")
 			fmt.Printf(ratimage2[1] + "\n")
 			fmt.Printf(ratimage2[2] + "\n")
-			time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+			time.Sleep(time.Millisecond * animateddelaySMALL)
 		}
 	}
 	pulldownanimation(30) //28 times/lines
@@ -75,14 +72,14 @@ func skullanimatefinale() {
 	skull[19] = "                              `▓  `       '  ▓'"
 	skull[20] = "                                `             '"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.`\u001b[33;1m█\u001b[31;1m'.X XXXX"
 	skull[17] = "                              XP^X'`▓ ▓ ▓'`X^XX"
 	skull[18] = "                              X. ▓  `   '  ▓ )X"
 	skull[19] = "                              `▓  `       '  ▓'"
 	skull[20] = "                                `             '"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[8] = "    `9XXXXXXXXXXXP' `9XX'   █\u001b[37;1m█-█\u001b[31;1m█   `98v8P'  █\u001b[37;1m█-█\u001b[31;1m█   `XXP' `9XXXXXXXXXXXP'"
 	skull[16] = "                              XXXX X.` '.X XXXX"
 	skull[17] = "                              XP^X'`\u001b[33;1m▓▓▓▓▓\u001b[31;1m'`X^XX"
@@ -90,14 +87,14 @@ func skullanimatefinale() {
 	skull[19] = "                              `▓ ▓` `   '  '▓ ▓'"
 	skull[20] = "                                `             '"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█▓▓▓█\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m███▓█████▓███\u001b[31;1m)X"
 	skull[19] = "                              `▓ ▓`▓`▓ ▓'▓▓'▓ ▓'"
 	skull[20] = "                                `             '"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██▓▓█████▓▓█\u001b[31;1m)X"
@@ -105,7 +102,7 @@ func skullanimatefinale() {
 	skull[20] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[21] = "                                  XX XX XX"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -113,7 +110,7 @@ func skullanimatefinale() {
 	skull[20] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[21] = "                                  XX XX XX"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -122,7 +119,7 @@ func skullanimatefinale() {
 	skull[21] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[22] = "                                  XX XX XX"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -133,7 +130,7 @@ func skullanimatefinale() {
 	skull[23] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[24] = "                                  XX XX XX"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[8] = "    `9XXXXXXXXXXXP' `9XX'  █\u001b[37;1m██-██\u001b[31;1m█  `98v8P' █\u001b[37;1m██-██\u001b[31;1m█  `XXP' `9XXXXXXXXXXXP'"
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
@@ -145,7 +142,7 @@ func skullanimatefinale() {
 	skull[23] = "                                XX`▓ ▓``▓ ▓`XX'"
 	skull[24] = "                                  XX XX XX"
 	drawskull()
-	time.Sleep(time.Millisecond * ANIMATEDELAYSMALL)
+	time.Sleep(time.Millisecond * animateddelaySMALL)
 	skull[16] = "                              XXXX X.║║║.X XXXX"
 	skull[17] = "                              XP^X║║\u001b[33;1m█████\u001b[31;1m║║X^XX"
 	skull[18] = "                              X.\u001b[33;1m██  █████  ██\u001b[31;1m)X"
@@ -158,7 +155,7 @@ func skullanimatefinale() {
 	skull[25] = "                                  XX XX XX"
 	drawskull()
 
-	time.Sleep(time.Millisecond * ANIMATEDELAY)
+	time.Sleep(time.Millisecond * animateddelay)
 }
 
 var skull = [26]string{
@@ -240,21 +237,21 @@ var castle = `
  ||_|_|_|_|_|_|_|___|___|___|___||_|_|_|_|_|____|___|___|____|___|__|__|__|`
 
 var castletext = []string{
-	0: "You're a mercenary adventurer...living in the castle...working for the Emperor,\n",
-	1: "and apprentice to Master Gurlows. Your commission is to neutralize feral finks in the\n",
+	0: "You're a mercenary adventurer...living in the castle...working for the Empress,\n",
+	1: "and apprentice to Exarch Gurlows. Your commission is to neutralize feral finks in the\n",
 	2: "cellar & you're approaching the cellar now. Rumors dictate a king rat holds the\n",
-	3: "sub-basement. Aggressive ones are causing trouble with kitchen staff. Master Gurlows\n",
-	4: "expects raticide. You arrive at the Cellar, weapon ready, hungover and in a hurry.\n",
+	3: "sub-basement. Aggressive ones are causing trouble with kitchen staff. Gurlows\n",
+	4: "expects raticide. You arrive at the Cellar, weapon ready, hungover and wary.\n",
 	5: "                      ▒▓▌PRESS ANY KEY TO CONTINUE▐▓▒",
 }
 
 var storyintrotext1 = []string{
 	0: "Slowly.....you begin to regain consciousness.........",
-	1: "As your nightmare subsides, your visions of the Beast fade....",
+	1: "Visions of the Beast fade as your nightmare subsides....",
 	2: "You wake up in rented quarters inside the Citadel.",
 	3: ".................",
 	4: "You struggle to your feet.",
-	5: "Indulgence is not unknown to adventurers. You're too hungover to remember your name.",
+	5: "The Beast be damned. You're too hungover to remember your name.",
 	6: "What is it again!?...",
 }
 
@@ -284,3 +281,49 @@ var titletext2 = []string{
 	9:  ` ██████`,
 	10: `░░░░░░░▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓█████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░`,
 }
+
+var castle2 = `                                 o
+                             .-""|
+                             |-""|
+                                 |   ._--+.
+                                .|-""      '.
+                               +:'           '.
+                               | '.        _.-'|
+                               |   +    .-"   J
+            _.+        .....'.'|    '.-"      |
+       _.-""   '.   ..'88888888|     +       J''..
+    +:"          '.'88888888888;-+.  |    _+.|8888:
+    | \         _.-+888888888_." _.F F +:'   '.8888'....
+     L \   _.-""   |8888_.-"  _." J J J  '.    +88888888:
+     |  '+"        |_.-"  _.-"    | | |    +    '.888888'._''.
+   .'8L  L         J  _.-"        | | |     '.    '.88_.-"    '. 
+  :888|  |         J-"            F F F       '.  _.-"          '.
+ :88888L  L     _+  L            J J J          '|.               '; 
+:888888J  |  +-"  \ L          _.+.|.+.          F '.          _.-" F
+:8888888|  L L\    \|      _.-"    '   '.       J    '.     .-"    |
+:8888888.L | | \    ', _.-"              '.     |      "..-"      J'.
+:888888: |  L L '.    \     _.-+.          '.   :+-.     |        F88'.
+:888888:  L | |   \    ;.-""     '.          :-"    ":+ J        |88888:
+:888888:  |  L L   +:""            '.    _.-"     .-" | |       J:888888:
+:888888:   L | |   J \               '.-'     _.-'   J J        F :888888:
+ :88888:    \ L L   L \             _.-+  _.-'       | |       |   :888888:
+ :888888:    \| |   |  '.       _.-"   |-"          J J       J     :888888:
+ :888888'.    +'\   J    \  _.-"       F    ,-T"\  | |     .-'      :888888:
+  :888888 '.     \   L    +"          J    /  | J  J J  .-'        .'888888:
+   :8888888 :     \  |    |           |    F  '.|.-'+|-'         .' 8888888:
+    :8888888 :     \ J    |           F   J     '...           .' 888888888:
+     :8888888 :     \ L   |          J    |      \88'.''.''''.' 8888888888:
+      :8888888 :     \|   |          |  .-'\      \8888888888888888888888:
+       :8888888 '.    J   |          F-'  .'\      \8888888888888888888.'
+        :88888888 :    L  |         J     : 8\      \8888888888888888.'
+         :88888888 :   |  |        .+  ...' 88\      \8888888888.''.'
+          :88888888 :  J  |     .-'  .'    8888\      \'.'''.'.' 
+           :88888888 :  \ |  .-'   .' 888888888.\    _-'     
+           :888888888 :  \|-'     .' 888888888.' \_-"
+            '.88888888'..         : 8888888.' 
+              :88888888  ''''.''.' 88888888:         
+              :8888888888888888888888888888:
+               :88888888888888888888888888:
+                :888888888888888888888888:
+                 ''.8888888888888...'.'''
+                     '''''......''`

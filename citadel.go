@@ -10,6 +10,7 @@ type citentity interface {
 
 type playerchar struct {
 	Name          string
+	battlecry     string //add this
 	Health        int
 	CurrHealthMax int
 	Area          string //chapter/floor
@@ -24,10 +25,21 @@ type playerchar struct {
 	Int           int
 	totxp         int
 	kills         int
+	inv           []*item
+}
+
+type item struct {
+	name     string
+	descrip  string
+	caneat   bool
+	candrink bool
+	canequip bool
+	cost     int
 }
 
 type enemy struct {
 	Name          string
+	state         string
 	Typeofen      string
 	Typeofatk     string
 	Atk           int
@@ -37,6 +49,7 @@ type enemy struct {
 	CurrHealthMax int
 	worthxp       int
 	img           []string
+	items         []*item
 }
 
 type maploc struct {
@@ -44,23 +57,34 @@ type maploc struct {
 	grid        string
 	area        string
 	descrip     string
-	lookdescrip string
+	lookdescrip []string
 	title       string
 	mobs        []*enemy
-	exits       []int // value of -1 = cant go , predefined list of end point rooms for each room, adjacency map. eg -1,-1,3,1,-1,-1
+	items       []*item
+	exits       []int // value of -1 = no exit , predefined list of end point rooms for each room, adjacency map. eg -1,-1,3,1,-1,-1
 }
 
-var P1 playerchar
+var p1 = new(playerchar)
 
 func main() {
+	promptofshame()
 	titleintro()
 	storyintro()
-	P1 := new(playerchar)          //creates player struct
-	initworld()                    //sets up Enemies and maplocs
-	initplayer(P1)                 //set initial player values
-	P1.SetName(initplayername(P1)) //set name and confirm choice
-	P1.SetHealth()
-	tutintro(P1)
-	navigator(P1) //??? calls drawplayerbar and generates room data
+	initworld()
+	tutintro(p1)
+	navigator(p1)
 
 }
+
+// gussy up the UI more
+// action menu in items screen
+// friendly enemies?
+// random attributes for enemies? e.g stocky, sickly, keen, albino
+// some kind of concurrent idle actions for NPCs
+// randomize battlecry
+// add hp to stats screen
+// add take action on look screen to take items dropped
+// add consider enemy function?
+// remove items after taking etc (opposite of append?)
+
+//to add rooms
