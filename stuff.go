@@ -50,6 +50,7 @@ func promptofshame() {
 	fmt.Println("RECOMMENDED:\nSet FONT SIZE to 18+")
 	fmt.Println("Expand this window a good bit. Go on.")
 	fmt.Println("now press a key to continue")
+	getcharpause()
 
 }
 
