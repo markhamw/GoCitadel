@@ -11,7 +11,6 @@ import (
 const (
 	animateddelay          = 100
 	animateddelaySMALL     = 50
-	MINHEALTH              = 0
 	BASEDAM                = 6
 	ZEROHOME               = "\033[0;0H"
 	playerbaruiboxname     = "\033[02;02H"

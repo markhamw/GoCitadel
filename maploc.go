@@ -23,7 +23,7 @@ func (l maploc) printdescrip() {
 	fmt.Print(l.descrip)
 }
 
-func (l *maploc) printmap() {
+func (l *maploc) printmap(playerloc uint8) {
 	fmt.Print(NAVLOC)
 	conred()
 	fmt.Printf("Detailed Map:\n%v\n", l.grid)

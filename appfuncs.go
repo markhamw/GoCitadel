@@ -142,14 +142,19 @@ func checkmove(player *playerchar, exits []int) {
 
 func navigator(player *playerchar) {
 	clear()
-	drawplayerbar(player)
+	drawplayerbar(player) //make this a method
 	player.makehealthbar()
-	color.Set(color.FgYellow, color.Bold, color.BgBlack)
 
+	//find another way to get player location and draw screens
+	//switch case can be improved on
+
+	//generatemaplocdata(player.getroom())
 	switch player.location {
 	case 1:
-		generatemaplocdata(cellar1, player)
-		checkbattle(player, rat1)
+
+		generatemaplocdata(player.getroom()) //prints maploc grid and description, NSEW move options
+
+		checkbattle(player, rat1)        //prints enemies in room
 		checkmove(player, cellar1.exits) //passes to checkmove: pointer to playerchar struct and slice of string from maploc
 	case 2:
 		generatemaplocdata(cellar2, player)
@@ -221,19 +226,19 @@ func checkbattle(player *playerchar, mob *enemy) {
 		if mob == bossrat {
 			fmt.Printf("His vileness's matted coat is impressive and dull fangs\nare bright orange from munching Elder Wax\n")
 		}
-		//go func to make rats do stuff randomly without player action
+
 	}
 
 	time.Sleep(time.Millisecond * 100)
 }
 
-func generatemaplocdata(loc *maploc, p *playerchar) {
-	loc.printmap()
+func generatemaplocdata(loc *maploc) {
+	loc.printmap(p1.getroom())
 	fmt.Print(NAVTRAVEL)
 
-	color.Set(color.FgYellow, color.Bold, color.BgBlack)
+	conyellow()
 	fmt.Print("Use N,S,E,W ░ U(up),D(down) ░ B=battle ░\nI=items ░ Q=stats ░ L=look ░")
-	p.checklvl()
+	p1.checklvl()
 }
 
 var lvl1 = true
@@ -506,21 +511,6 @@ func drawplayerbar(player *playerchar) {
 	conwhite()
 	fmt.Printf("Health:%v/%v", player.GetHealth(), player.GetMaxHealth())
 	fmt.Print(playerbaruiboxnamedone)
-
-	//╔═ ╗ ╚═ ╝
-
-	/* 	titlebar1 := "\n░░░░░░░▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓█████▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒░░░░░░░"
-	   	color.Set(color.FgBlue)
-	   	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	   	fmt.Print("PLAYER:")
-	   	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	   	fmt.Print(player.Name, "\t")
-	   	color.Set(color.FgWhite, color.Bold, color.BgBlack)
-	   	fmt.Print("\tMax HP:")
-	   	color.Set(color.FgGreen, color.Bold, color.BgBlack)
-	   	fmt.Print(player.CurrHealthMax)
-	   	color.Set(color.FgBlue)
-	   	fmt.Println(titlebar1) */
 
 }
 

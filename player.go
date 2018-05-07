@@ -35,8 +35,11 @@ func (f *playerchar) getbattlerap() {
 		14: "Slow down there partner.",
 		15: "Turn in your badge and gun.",
 		16: "It hurts you more than it hurts me.",
+		17: "Say hello to my little friend.",
+		18: "(RatsNameHere) is bad at this.",
+		19: "I heard something today, it sounded like this: Enemys in the game called Citadel really suck.",
 	}
-	string := x[rand.Intn(17)]
+	string := x[rand.Intn(20)]
 	y := rand.Intn(12)
 
 	if y > 9 {

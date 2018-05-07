@@ -76,15 +76,16 @@ func main() {
 
 }
 
-// gussy up the UI more
+//mon night working on generatemaploc funcs to improve expandability
+
+// level up mechanics broken
+// improve UI
 // action menu in items screen
 // friendly enemies?
 // random attributes for enemies? e.g stocky, sickly, keen, albino
 // some kind of concurrent idle actions for NPCs
-// randomize battlecry
+// randomize battlecries and enemy and player chatter
 // add hp to stats screen
 // add take action on look screen to take items dropped
 // add consider enemy function?
-// remove items after taking etc (opposite of append?)
-
-//to add rooms
+// remove items after taking
