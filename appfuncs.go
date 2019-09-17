@@ -152,20 +152,20 @@ func navigator(player *playerchar) {
 	switch player.location {
 	case 1:
 
-		generatemaplocdata(player.getroom()) //prints maploc grid and description, NSEW move options
+		generatemaplocdata(cellar1) //prints maploc grid and description, NSEW move options
 
 		checkbattle(player, rat1)        //prints enemies in room
 		checkmove(player, cellar1.exits) //passes to checkmove: pointer to playerchar struct and slice of string from maploc
 	case 2:
-		generatemaplocdata(cellar2, player)
+		generatemaplocdata(cellar2)
 		checkbattle(player, rat2)
 		checkmove(player, cellar2.exits)
 	case 3:
-		generatemaplocdata(cellar3, player)
+		generatemaplocdata(cellar3)
 		checkbattle(player, rat3)
 		checkmove(player, cellar3.exits)
 	case 4:
-		generatemaplocdata(cellar4, player)
+		generatemaplocdata(cellar4)
 		checkbattle(player, bossrat)
 		checkmove(player, cellar4.exits)
 	}
@@ -233,7 +233,7 @@ func checkbattle(player *playerchar, mob *enemy) {
 }
 
 func generatemaplocdata(loc *maploc) {
-	loc.printmap(p1.getroom())
+	//loc.printmap(p1.getroom())
 	fmt.Print(NAVTRAVEL)
 
 	conyellow()
