@@ -1,4 +1,4 @@
-package main
+package citadel
 
 type citentity interface {
 	hitroll(int) bool
@@ -53,7 +53,7 @@ type enemy struct {
 }
 
 type maploc struct {
-	roomid      uint8 //foreign key for playerchar mapping
+	roomid      uint8 //used with playerchar mapping
 	grid        string
 	area        string
 	descrip     string
@@ -75,17 +75,3 @@ func main() {
 	navigator(p1)
 
 }
-
-//mon night working on generatemaploc funcs to improve expandability
-
-// level up mechanics broken
-// improve UI
-// action menu in items screen
-// friendly enemies?
-// random attributes for enemies? e.g stocky, sickly, keen, albino
-// some kind of concurrent idle actions for NPCs
-// randomize battlecries and enemy and player chatter
-// add hp to stats screen
-// add take action on look screen to take items dropped
-// add consider enemy function?
-// remove items after taking
