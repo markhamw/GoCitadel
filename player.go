@@ -37,7 +37,7 @@ func (f *playerchar) getbattlerap() {
 		16: "It hurts you more than it hurts me.",
 		17: "Say hello to my little friend.",
 	}
-	string := x[rand.Intn(20)]
+	string := x[rand.Intn(len(x)-1)]
 	y := rand.Intn(12)
 
 	if y > 9 {
