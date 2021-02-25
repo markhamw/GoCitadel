@@ -1,4 +1,4 @@
-package citadel
+package main
 
 import (
 	"fmt"

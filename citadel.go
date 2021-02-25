@@ -1,4 +1,4 @@
-package citadel
+package main
 
 type citentity interface {
 	hitroll(int) bool
